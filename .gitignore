@@ -1,0 +1,67 @@
+# Data / model / cache
+*.npz
+*.csv
+*.json
+*.exe
+!chemical_tags_from_kb.json
+
+# =========================
+# PYTHON VIRTUAL ENV
+# =========================
+venv/
+.venv/
+env/
+ENV/
+virtualenv/
+.python-version
+
+# =========================
+# PYTHON LIB
+# =========================
+Lib/
+
+# =========================
+# PYTHON CACHE
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# BUILD / DIST
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# LOG FILES
+# =========================
+# *.log
+debug_multi/
+debug_multi_hop/
+debug_timing/
+# =========================
+# JUPYTER
+# =========================
+.ipynb_checkpoints
+
+# =========================
+# IDE / EDITOR
+# =========================
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# OS SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# ENV FILE (BIẾN MÔI TRƯỜNG)
+# =========================
+.env
+.env.*
