@@ -114,3 +114,16 @@ t=2026-01-28T12:39:33+0700 lvl=info msg="join connections" obj=join id=98efeeb35
 t=2026-01-28T12:39:44+0700 lvl=info msg="join connections" obj=join id=77c70dd88223 l=127.0.0.1:5000 r=222.253.253.23:50031
 t=2026-01-28T12:41:55+0700 lvl=info msg="join connections" obj=join id=a15afc6f48f9 l=127.0.0.1:5000 r=222.253.253.23:50031
 t=2026-01-28T13:06:02+0700 lvl=info msg="join connections" obj=join id=3b1f33c291b0 l=127.0.0.1:5000 r=222.253.253.72:55841
+t=2026-01-28T15:09:09+0700 lvl=info msg="join connections" obj=join id=e4c36604c37f l=127.0.0.1:5000 r=222.253.253.72:60229
+t=2026-01-28T15:09:10+0700 lvl=info msg="join connections" obj=join id=a74e4d8d10d4 l=127.0.0.1:5000 r=222.253.253.72:60229
+t=2026-01-28T15:09:10+0700 lvl=info msg="join connections" obj=join id=021d6a9f8251 l=127.0.0.1:5000 r=222.253.253.72:60229
+t=2026-01-28T15:09:11+0700 lvl=info msg="join connections" obj=join id=fe3f688e15de l=127.0.0.1:5000 r=222.253.253.72:60253
+t=2026-01-28T15:09:24+0700 lvl=info msg="join connections" obj=join id=06ac3d3fdd37 l=127.0.0.1:5000 r=222.253.253.72:60229
+t=2026-01-28T15:10:07+0700 lvl=info msg="join connections" obj=join id=1bba1d6f7e25 l=127.0.0.1:5000 r=222.253.253.72:60229
+t=2026-01-28T18:33:56+0700 lvl=info msg="update available" obj=updater
+t=2026-01-28T18:38:27+0700 lvl=info msg="Got quit command" obj=consoleui
+t=2026-01-28T18:38:27+0700 lvl=info msg="received stop request" obj=app stopReq="{err:<nil> restart:false}"
+t=2026-01-28T18:38:27+0700 lvl=info msg="session closing" obj=tunnels.session err=nil
+t=2026-01-28T18:38:27+0700 lvl=info msg="accept failed" obj=tunnels.session obj=csess id=006711ac5192 err="reconnecting session closed"
+t=2026-01-28T18:38:27+0700 lvl=info msg="failed to accept connection: Listener closed" obj=tunnels.session clientid=17d78acea5766ed678a4b14457b920f2
+t=2026-01-28T18:38:27+0700 lvl=warn msg="Stopping forwarder" name=command_line acceptErr="failed to accept connection: Listener closed"

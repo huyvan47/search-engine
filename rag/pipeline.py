@@ -224,14 +224,15 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     # 0) ROUTER – QUYỀN CAO NHẤT (DÙNG effective_query)
     # =====================================================
     route = route_query(client, effective_query)
-
+    timer.start("normalize")
     norm_query = normalize_query(client, effective_query)
     norm_lower = norm_query.lower()
-    timer.mark("normalize")
+    timer.end("normalize")
 
     # =====================================================
     # MEMORY – READ (LONG-TERM, BEFORE REASONING / HOP0)
     # =====================================================
+    timer.start("read_memory and check route")
     memory_facts = read_memory(
         client=client,
         user_id=user_id,
@@ -249,7 +250,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         route = "RAG"
 
     print("route:", route)
-    timer.mark("router")
+    timer.end("read_memory and check route")
 
     # =====================================================
     # 1) NHÁNH GLOBAL
@@ -270,7 +271,6 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         # --- short-term append ---
         conversation_state.append(user_id, "user", user_query)
         conversation_state.append(user_id, "assistant", text)
-
         return {
             "text": text,
             "img_keys": [],
@@ -283,9 +283,10 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     # =====================================================
     # 2) TAG FILTER
     # =====================================================
+    timer.start("checking listing and tag filter")
     is_list = is_listing_query(norm_query)
     result = tag_filter_pipeline(norm_query)
-    timer.mark("tag_filter")
+    timer.end("checking listing and tag filter")
 
     must_tags = result.get("must", [])
     any_tags = result.get("any", [])
@@ -294,21 +295,24 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     # 3) RETRIEVAL
     # =====================================================
     if is_formula_query(norm_query, result):
+        timer.start("is_formula_query running")
         hits = formula_mode_search(
             client=client,
             kb=kb,
             norm_query=norm_query,
             must_tags=must_tags,
         )
+        timer.end("is_formula_query running")
     else:
+        timer.start("multi_hop_controller running")
         hits = multi_hop_controller(
             client=client,
             kb=kb,
             base_query=norm_query,
             must_tags=must_tags,
             any_tags=any_tags,
-            timer=timer,
         )
+        timer.end("multi_hop_controller running")
 
     print("QUERY      :", norm_query)
     print("MUST TAGS  :", must_tags)
@@ -317,6 +321,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     debug_log("MUST TAGS  :", must_tags)
     debug_log("ANY TAGS   :", any_tags)
 
+    timer.start("build_context running")
     hits = preserve_search_order(hits)
 
     if not hits:
@@ -340,8 +345,9 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
 
     context = build_context_from_hits(hits[:max_ctx])
-    timer.mark("build_context")
+    timer.end("build_context running")
 
+    timer.start("call_finetune_with_context running")
     policy = decide_answer_policy(
         effective_query, primary_doc, force_listing=is_list
     )
@@ -357,7 +363,6 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         answer_mode=answer_mode_final,
         rag_mode="STRICT",
     )
-    timer.mark("llm_generate")
 
     final_answer = enrich_answer_if_needed(
         client=client,
@@ -368,8 +373,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         must_tags=must_tags,
         route="RAG",
     )
-    timer.mark("enrich_answer_if_needed")
-
+    timer.end("call_finetune_with_context running")
     # =====================================================
     # SHORT-TERM + LONG-TERM MEMORY WRITE
     # =====================================================

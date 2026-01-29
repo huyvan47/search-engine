@@ -24,11 +24,6 @@ _non_alnum_keep_ops_re = re.compile(r"[^a-z0-9\s\+\-\/]+")
 # Dùng cho entity match (crop/pest/disease/weed) để tránh mismatch "khoai-mi" vs "khoai mi"
 _non_alnum_entity_re = re.compile(r"[^a-z0-9\s]+")
 
-_SPLIT_PARTS_RE = re.compile(r"\s*(?:\+)\s*")  # tier split theo '+'
-_OR_TOKEN_RE = re.compile(r"(?:^|\s)(?:hoac|hoặc|or)(?:\s|$)")
-_AND_SPLIT_RE = re.compile(r"\s*(?:va|và|,|;)\s*")
-
-
 def _strip_accents_lower(text: str) -> str:
     text = text.lower().strip().replace("đ", "d")
     text = unicodedata.normalize("NFD", text)
@@ -208,6 +203,7 @@ CHEMICAL_ALIASES = {
     "hoagland-solution": ["dung dich hoagland"],
     "hoaglands-solution": ["dung dich hoagland"],
     "hymexazol": ["thuoc tru nam hymexazol", "hymexazol"],
+    "kasugamycin": ["thuoc kasugamycin", "thuoc khang sinh kasugamycin", "kasugamycin"],
     "ic-top": ["thuoc tru sau ic-top"],
     "imazalil": ["thuoc tru nam imazalil"],
     "imidacloprid": ["thuoc tru sau imidacloprid", "thuoc tru sau imidakloprid", "imidacloprid"],
@@ -223,6 +219,7 @@ CHEMICAL_ALIASES = {
     "mefenoxam": ["thuoc tru benh mefenoxam"],
     "mesotrione": ["thuoc diet co mesotrione", "mesotrione"],
     "metaflumizone": ["thuoc tru sau metaflumizone", "metaflumizone"],
+    "metaldehyde": ["thuoc tru sau metaflumizone", "metaflumizone", "metaldehyde"],
     "metalaxyl": ["thuoc tru benh metalaxyl", "metalaxyl"],
     "oxine-copper": ["oxine dong", "thuoc diet sau oxine dong"],
     "penconazole": ["penconazole", "thuoc diet nam penconazole"],
@@ -795,7 +792,6 @@ PRODUCT_ALIASES = {
     "kajio-5ec": ["thuoc bao ve thuc vat kajio 5ec", "thuoc kajio 5ec", "kajio", "kajio-5ec", "kajio5ec"],
     "kajio-5ec-g9-thanh-sau": ["thuoc bao ve thuc vat kajio 5ec g9 thanh sau", "thuoc kajio 5ec g9 thanh sau", "kajio g9", "kajio-g9", "kajio 5ec", "kajio", "kajio-5ec", "kajio thanh sau"],
     "kajio-5wg": ["thuoc bao ve thuc vat kajio 5wg", "thuoc kajio 5wg", "kajio", "kajio-5wg"],
-    "kasugamycin": ["thuoc kasugamycin", "thuoc khang sinh kasugamycin", "kasugamycin"],
     "kasuhan-4wp": ["thuoc bao ve thuc vat kasuhan 4wp", "thuoc kasuhan 4wp", "kasuhan 4wp", "kasuhan-4wp", "kasuhan"],
     "kenbast-15sl": ["thuoc bao ve thuc vat kenbast 15sl", "kenbast", "kenbast-15sl"],
     "khongray-54wp": ["thuoc bao ve thuc vat khongray 54wp", "thuoc khongray 54wp", "khongray", "khongray-54wp", "2 hoat chat", "hai hoat chat"],
@@ -1290,70 +1286,6 @@ def match_aliases(text: str, aliases: Dict[str, List[str]], normalizer: Callable
 
 
 # ===========================
-# 5) MECHANISM MATCHING LOGIC
-# ===========================
-
-_SPLIT_PLUS = re.compile(r"\s*\+\s*")
-_SPLIT_AND = re.compile(r"\s*(?:va|và|,|;)\s*")
-
-
-def _compile_mech_patterns():
-    compiled = {}
-    for key, variants in MECHANISMS_ALIASES.items():
-        pats = []
-        for v in variants:
-            alias = normalize_entity(v)
-            if not alias:
-                continue
-            pats.append(re.compile(rf"(?:^|\s){re.escape(alias)}(?:\s|$)"))
-        compiled[key] = pats
-    return compiled
-
-
-_MECH_PATTERNS = _compile_mech_patterns()
-
-
-def _match_mech_in_text(text: str) -> List[str]:
-    norm = f" {normalize_entity(text)} "
-    found: List[str] = []
-
-    # sort alias theo độ dài giảm dần
-    sorted_keys = sorted(
-        _MECH_PATTERNS.items(),
-        key=lambda x: max((len(p.pattern) for p in x[1]), default=0),
-        reverse=True
-    )
-
-    used_spans = []
-    for key, patterns in sorted_keys:
-        for p in patterns:
-            m = p.search(norm)
-            if m:
-                span = m.span()
-                # check overlap
-                if any(not (span[1] <= s[0] or span[0] >= s[1]) for s in used_spans):
-                    continue
-                found.append(key)
-                used_spans.append(span)
-                break
-
-    return found
-
-
-def _pick_core(keys: List[str]) -> Optional[str]:
-    if not keys:
-        return None
-    ranked = sorted(
-        keys,
-        key=lambda x: (
-            0 if "tiep-xuc-luu-dan" in x else 1,
-            0 if x.endswith("-manh") else 1,
-            -len(x)
-        )
-    )
-    return ranked[0]
-
-# ===========================
 # 6) UNIFIED KB INFERENCE (TARGET-FIRST + CROP-FALLBACK)
 # ===========================
 
@@ -1361,7 +1293,6 @@ def infer_chemicals_from_kb(
     crops: Set[str],
     diseases: Set[str],
     pests: Set[str],
-    weeds: Set[str],
 ) -> Tuple[Set[str], str]:
     """
     Trả về (chemicals, mode)
@@ -1377,7 +1308,6 @@ def infer_chemicals_from_kb(
     crops_n = normalize_set(crops, normalize_entity)
     diseases_n = normalize_set(diseases, normalize_entity)
     pests_n = normalize_set(pests, normalize_entity)
-    weeds_n = normalize_set(weeds, normalize_entity)
 
     def _filter_by_crop_if_any(kb_crops: Set[str]) -> bool:
         # nếu user có crop thì bắt buộc intersect; nếu không có crop thì không chặn
@@ -1393,11 +1323,6 @@ def infer_chemicals_from_kb(
             if target.intersection(kb_targets) and _filter_by_crop_if_any(kb_crops):
                 out.add(chem)
         return out
-
-    # 1) Weed
-    chems = _match_target(weeds_n, "weeds")
-    if chems:
-        return chems, "weed"
 
     # 2) Pest
     chems = _match_target(pests_n, "pests")
@@ -1450,7 +1375,6 @@ def extract_tags(norm_query_raw: str) -> Dict:
     crops = match_aliases(norm_query_raw, CROP_ALIASES, normalize_entity)
     diseases = match_aliases(norm_query_raw, DISEASE_ALIASES, normalize_entity)
     pests = match_aliases(norm_query_raw, PEST_ALIASES, normalize_entity)
-    weeds = match_aliases(norm_query_raw, PEST_ALIASES, normalize_entity)
 
     products = match_aliases(norm_query_raw, PRODUCT_ALIASES, normalize_entity)
     brands = match_aliases(norm_query_raw, BRAND_ALIASES, normalize_entity)
@@ -1461,7 +1385,7 @@ def extract_tags(norm_query_raw: str) -> Dict:
     # Chemical match: dùng normalize() để giữ tên có dấu '-'
     direct_chems = match_aliases(norm_query_raw, CHEMICAL_ALIASES, normalize)
 
-    kb_chems, kb_mode = infer_chemicals_from_kb(crops, diseases, pests, weeds)
+    kb_chems, kb_mode = infer_chemicals_from_kb(crops, diseases, pests)
 
     # all chemicals: explicit + inferred
     all_chems = set(direct_chems).union(kb_chems)
@@ -1481,8 +1405,6 @@ def extract_tags(norm_query_raw: str) -> Dict:
         any_tags.add(f"crop:{c}")
     for p in pests:
         any_tags.add(f"pest:{p}")
-    for w in weeds:
-        any_tags.add(f"weed:{w}")
 
     # Disease thường khá "hard" -> MUST
     for d in diseases:
@@ -1508,21 +1430,9 @@ def extract_tags(norm_query_raw: str) -> Dict:
     for chem in (all_chems - set(direct_chems)):
         any_tags.add(f"chemical:{chem}")
 
-    found_entities = {
-        "crops": sorted(list(crops)),
-        "diseases": sorted(list(diseases)),
-        "pests": sorted(list(pests)),
-        "weeds": sorted(list(weeds)),
-        "direct_chemicals": sorted(list(direct_chems)),
-        "kb_chemicals": sorted(list(kb_chems)),
-        "kb_mode": kb_mode,
-        "chemicals_all": sorted(list(all_chems)),
-    }
-
     return {
         "must": sorted(list(must_tags)),
         "any": sorted(list(any_tags)),
-        "found": found_entities
     }
 
 
@@ -1550,30 +1460,10 @@ def tag_filter_pipeline(query: str) -> Dict:
     for w in match_aliases(norm_raw, PEST_ALIASES, normalize_entity):
         detected_any.add(f"weed:{w}")
 
-    # 3) Report (debug/explain)
-    found = {
-
-        "products": sorted(list(match_aliases(norm_raw, PRODUCT_ALIASES, normalize_entity))),
-        "brands": sorted(list(match_aliases(norm_raw, BRAND_ALIASES, normalize_entity))),
-        "formulas": sorted(list(match_aliases(norm_raw, FORMULA_ALIASES, normalize_entity))),
-        "formulations": sorted(list(match_aliases(norm_raw, FORMULATION_ALIASES, normalize_entity))),
-
-        "crops": tags["found"]["crops"],
-        "diseases": tags["found"]["diseases"],
-        "pests": tags["found"]["pests"],
-        "weeds": tags["found"]["weeds"],
-
-        "chemicals_direct": tags["found"]["direct_chemicals"],
-        "chemicals_inferred": tags["found"]["kb_chemicals"],
-        "kb_mode": tags["found"]["kb_mode"],
-        "chemicals_all": tags["found"]["chemicals_all"],
-    }
-
     return {
         "query": query,
         "must": sorted(list(must_tags)),
         "any": sorted(list(detected_any)),
-        "found": found
     }
 
 

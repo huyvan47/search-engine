@@ -165,7 +165,6 @@ def multi_hop_controller(
     base_query: str,
     must_tags: List[str],
     any_tags: List[str],
-    timer=None,
 ) -> List[dict]:
     """
     Multi-hop đúng chuẩn (LLM-in-the-loop) trên hạ tầng hiện có:
@@ -197,9 +196,6 @@ def multi_hop_controller(
     hops_data: List[dict] = []
     used_queries = set()
 
-    if timer:
-        timer.mark("multi_hop_start")
-
     # (Optional) intent hint — chỉ để log/diagnostic, không hard-code tags
     intent_hint = analyze_intent_strategy(client, base_query)
 
@@ -216,8 +212,6 @@ def multi_hop_controller(
         must_tags=must_tags,
         any_tags=[],  # strict
     )
-    if timer:
-        timer.mark_sub("multi_hop", "hop_1_retrieve")
 
     unique_hits1 = _dedupe_hits(hits1, seen_ids)
     all_hits.extend(unique_hits1)
@@ -248,8 +242,6 @@ def multi_hop_controller(
     # stop cứng: đủ coverage ngay
     if len(all_hits) >= min_docs:
         hop1_record["decision"]["stop_reason"] = f"enough_docs_after_hop1>={min_docs}"
-        if timer:
-            timer.mark("multi_hop_total")
         if enable_logs:
             write_multi_hop_logs(
                 original_query=base_query,
@@ -318,8 +310,6 @@ def multi_hop_controller(
             must_tags=must_local,
             any_tags=any_local,
         )
-        if timer:
-            timer.mark_sub("multi_hop", f"hop_{hop}_retrieve")
 
         unique_hits_h = _dedupe_hits(hits_h, seen_ids)
         added = len(unique_hits_h)
@@ -349,8 +339,6 @@ def multi_hop_controller(
         # update current query for next iteration
         current_query = next_query
 
-    if timer:
-        timer.mark("multi_hop_total")
 
     if enable_logs:
         write_multi_hop_logs(

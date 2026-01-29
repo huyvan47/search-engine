@@ -3,6 +3,9 @@
 		{
 			"name": "search-engine",
 			"path": "."
+		},
+		{
+			"path": "../data"
 		}
 	]
 }
