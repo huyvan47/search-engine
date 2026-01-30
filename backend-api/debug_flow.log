@@ -5185,3 +5185,234 @@ picked_count: 20
 top_k       : 20
 ========================
 
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Tất cả sản phẩm trị nhện. ===
+
+#01 idx=293 sim=0.5108 tag_score=0 id=sau_hai_05_nhen_36__000204 entity=product
+    Q: Xử lý Nhện  kháng cao; nhiều nhện   như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:pest-control|pest:nhen|formula:cong-thuc-nhen-khang-cao|chemical:abamectin|product:abinsec-sieu-diet-nhen
+
+#02 idx=471 sim=0.4972 tag_score=0 id=Buti entity=product
+    Q: Buti 43SC Anh Hùng Nhện
+    reason: PASS: no must/any provided
+    tags_v2: product:Buti-43sc-anh-hung-nhen|chemical:bifenazate|pest:nhen|pest:white-spider-mite|brand:delta
+
+#03 idx=86 sim=0.4848 tag_score=0 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#04 idx=472 sim=0.4724 tag_score=0 id=sieu_diet_nhen entity=product
+    Q: Siêu Diệt Nhện
+    reason: PASS: no must/any provided
+    tags_v2: product:sieu-diet-nhen|chemical:abamectin|pest:nhen|pest:nhen|crop:rau|crop:cay-an-qua|brand:bmc|brand:phuc-thinh
+
+#05 idx=191 sim=0.4677 tag_score=0 id=abinsec_1_8ec_tr_m_nh_n_chunk_01 entity=product
+    Q: Sản phẩm Abinsec 1.8EC là thuốc gì và có công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:nhen|pest:white-spider-mite|crop:cam|mechanisms:tiep-xuc
+
+#06 idx=292 sim=0.4661 tag_score=0 id=sau_hai_05_nhen_35__000203 entity=product
+    Q: Xử lý Nhện ít; mật độ thấp; vùng nhện ít khi mật độ bình thường như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:acaricide|pest:nhen|formula:cong-thuc-nhen|chemical:abamectin
+
+#07 idx=500 sim=0.4656 tag_score=0 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must/any provided
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#08 idx=467 sim=0.4591 tag_score=0 id=LAMA entity=product
+    Q: LAMA 50EC
+    reason: PASS: no must/any provided
+    tags_v2: product:lama-50ec|chemical:hexythiazox|pest:nhen|pest:white-mite|crop:rau|crop:hoa|brand:bmc
+
+#09 idx=512 sim=0.4582 tag_score=0 id=Xiexie entity=product
+    Q: Xiexie 200WP ANH HÙNG KHUẨN
+    reason: PASS: no must/any provided
+    tags_v2: product:xiexie-200wp-anh-hung-khuan|chemical:bismerthiazol|pest:bacterial-diseases|disease:bacterial-blight|disease:bacterial-spot|crop:lua|brand:agrishop
+
+#10 idx=473 sim=0.4561 tag_score=0 id=nhen_kim_cuong entity=product
+    Q: Nhện Kim Cương
+    reason: PASS: no must/any provided
+    tags_v2: product:nhen-kim-cuong|chemical:deltamethrin|pest:nhen
+
+#11 idx=272 sim=0.4540 tag_score=0 id=sau_hai_05_tri_15__000185 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|pest:bo-tri|formula:cong-thuc-bo-tri|product:zigen-super|product:nofara|mechanisms:tiep-xuc-luu-dan-manh
+
+#12 idx=485 sim=0.4534 tag_score=0 id=Haruko entity=product
+    Q: Haruko 5SC, Zeroanvil
+    reason: PASS: no must/any provided
+    tags_v2: product:hexa|product:haruko-5sc|product:zeroanvil|chemical:hexaconazole|pest:fungal-diseases|pest:benh-nam|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#13 idx=515 sim=0.4426 tag_score=0 id=NAKANO entity=product
+    Q: NAKANO 50WP
+    reason: PASS: no must/any provided
+    tags_v2: product:nakano-50wp|chemical:dithianon|pest:ghe-seo|pest:suong-mai|pest:than-thu|brand:agrishop
+
+#14 idx=466 sim=0.4409 tag_score=0 id=FORZATE entity=product
+    Q: FORZATE 20EW
+    reason: PASS: no must/any provided
+    tags_v2: product:forzate-20ew|chemical:fosthiazate|pest:root-knot-nematode|crop:ca-phe|disease:nematode-infestation|brand:delta
+
+#15 idx=9 sim=0.4393 tag_score=0 id=quy_trinh_nuoi_trai_sau_rieng_02 entity=procedure
+    Q: Trong giai đoạn trái non đến 6–8 lạng, phun dinh dưỡng cho trái sầu riêng theo những đơn nào?
+    reason: PASS: no must/any provided
+    tags_v2: crop:durian|chemical:amino|chemical:cabona
+
+#16 idx=499 sim=0.4384 tag_score=0 id=SHINAWA entity=product
+    Q: SHINAWA 400EC
+    reason: PASS: no must/any provided
+    tags_v2: product:shinawa-400ec|chemical:flusilazole|disease:lem-lep-hat|disease:phan-trang|brand:agrishop
+
+#17 idx=448 sim=0.4347 tag_score=0 id=BINHFOS_gr entity=product
+    Q: VUA SÂU, VUA RỆP - SÂU - RẦY, ANH HÙNG SÂU, TRÙM SÂU
+    reason: PASS: no must/any provided
+    tags_v2: product:vua-sau|product:vua-rep-sau-ray|product:anh-hung-sau|product:trum-sau|product:binhfos-50ec|chemical:profenofos|pest:nhen|pest:bo-tri|mechanisms:xong-hoi-manh|pest:ray-nau|brand:delta
+
+#18 idx=486 sim=0.4345 tag_score=0 id=HoangANHVIL entity=product
+    Q: HoangANHVIL 50SC
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:fungal-infections|crop:lua|brand:bmc|brand:phuc-thinh
+
+#19 idx=496 sim=0.4331 tag_score=0 id=NATICUR entity=product
+    Q: NATICUR
+    reason: PASS: no must/any provided
+    tags_v2: product:naticur|chemical:tebuconazole|chemical:trioxystrobin|disease:lem-lep-hat|brand:delta
+
+#20 idx=259 sim=0.4273 tag_score=0 id=sau_hai_05_ray_lung_trang_02__000172 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:luu-dan-manh|object:exami|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Danh sách sản phẩm trị nhện và thành phần chính ===
+
+#01 idx=459 sim=0.3929 tag_score=2 id=EXAMI entity=product
+    Q: EXAMI 20WG
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid', 'pest:nhen']
+    tags_v2: product:exami-20wg|chemical:flonicamid|pest:bo-nhay|pest:nhen|crop:cay-an-qua|brand:delta|mechanisms:luu-dan-manh
+
+#02 idx=187 sim=0.3709 tag_score=2 id=raynanusa_400wp_si_u_r_y_r_p_thay_th_dino_top_chunk_01 entity=product
+    Q: Sản phẩm Raynanusa 400WP là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:raynanusa-400wp|chemical:buprofezin|chemical:dinotefuran|pest:aphids|pest:bo-tri|mechanisms:luu-dan-manh
+
+#03 idx=133 sim=0.3696 tag_score=2 id=khongray_54wp_chunk_01 entity=product
+    Q: Thuốc Khongray 54WP có thành phần và công dụng chính như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:dinotefuran|pest:aphid|pest:bo-tri|pest:leafhopper|mechanisms:luu-dan-manh
+
+#04 idx=455 sim=0.3217 tag_score=2 id=Suparep entity=product
+    Q: Suparep 400WP
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:suparep-400wp|chemical:buprofezin|chemical:dinotefuran|pest:ray-nau|crop:lua|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan-manh
+
+#05 idx=471 sim=0.4768 tag_score=1 id=Buti entity=product
+    Q: Buti 43SC Anh Hùng Nhện
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:Buti-43sc-anh-hung-nhen|chemical:bifenazate|pest:nhen|pest:white-spider-mite|brand:delta
+
+#06 idx=293 sim=0.4664 tag_score=1 id=sau_hai_05_nhen_36__000204 entity=product
+    Q: Xử lý Nhện  kháng cao; nhiều nhện   như thế nào?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: action:pest-control|pest:nhen|formula:cong-thuc-nhen-khang-cao|chemical:abamectin|product:abinsec-sieu-diet-nhen
+
+#07 idx=86 sim=0.4576 tag_score=1 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#08 idx=473 sim=0.4524 tag_score=1 id=nhen_kim_cuong entity=product
+    Q: Nhện Kim Cương
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:nhen-kim-cuong|chemical:deltamethrin|pest:nhen
+
+#09 idx=467 sim=0.4348 tag_score=1 id=LAMA entity=product
+    Q: LAMA 50EC
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:lama-50ec|chemical:hexythiazox|pest:nhen|pest:white-mite|crop:rau|crop:hoa|brand:bmc
+
+#10 idx=472 sim=0.4283 tag_score=1 id=sieu_diet_nhen entity=product
+    Q: Siêu Diệt Nhện
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:sieu-diet-nhen|chemical:abamectin|pest:nhen|pest:nhen|crop:rau|crop:cay-an-qua|brand:bmc|brand:phuc-thinh
+
+#11 idx=191 sim=0.4244 tag_score=1 id=abinsec_1_8ec_tr_m_nh_n_chunk_01 entity=product
+    Q: Sản phẩm Abinsec 1.8EC là thuốc gì và có công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:nhen|pest:white-spider-mite|crop:cam|mechanisms:tiep-xuc
+
+#12 idx=292 sim=0.4218 tag_score=1 id=sau_hai_05_nhen_35__000203 entity=product
+    Q: Xử lý Nhện ít; mật độ thấp; vùng nhện ít khi mật độ bình thường như thế nào?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: process:pest-control|action:apply-chemical|object:acaricide|pest:nhen|formula:cong-thuc-nhen|chemical:abamectin
+
+#13 idx=474 sim=0.4135 tag_score=1 id=diet_nhen_sam_set entity=product
+    Q: Diệt Nhện Sấm Sét
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:diet-nhen-sam-set|chemical:lambda-cyhalothrin|pest:nhen|brand:delta
+
+#14 idx=174 sim=0.4132 tag_score=1 id=kyodo_25sc_i_b_ng_kydo_chunk_01 entity=product
+    Q: Sản phẩm Kyodo 25SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:kyodo-25sc|chemical:diafenthiuron|pest:bo-tri|pest:nhen|pest:white-spider-mite|mechanisms:tiep-xuc
+
+#15 idx=448 sim=0.4096 tag_score=1 id=BINHFOS_gr entity=product
+    Q: VUA SÂU, VUA RỆP - SÂU - RẦY, ANH HÙNG SÂU, TRÙM SÂU
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:vua-sau|product:vua-rep-sau-ray|product:anh-hung-sau|product:trum-sau|product:binhfos-50ec|chemical:profenofos|pest:nhen|pest:bo-tri|mechanisms:xong-hoi-manh|pest:ray-nau|brand:delta
+
+#16 idx=462 sim=0.3998 tag_score=1 id=giao_su_sau entity=product
+    Q: GIÁO SƯ SÂU
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:giao-su-sau|chemical:avermectin|chemical:abamectin|pest:leaf-folder|pest:nhen
+
+#17 idx=460 sim=0.3972 tag_score=1 id=MILLION entity=product
+    Q: MILLION 50WG, TEPENYAKI 50WG
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid']
+    tags_v2: product:million-50wg|chemical:flonicamid|pest:planthopper|pest:whitefly|crop:lua|brand:agrishop|mechanisms:luu-dan-manh
+
+#18 idx=464 sim=0.3966 tag_score=1 id=SUPAREP entity=product
+    Q: SUPAREP 22.4SC
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat']
+    tags_v2: product:suparep-22-4sc|chemical:spirotetramat|pest:aphid|pest:bo-tri|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan
+
+#19 idx=470 sim=0.3931 tag_score=1 id=SETIS entity=product
+    Q: SETIS GIÁO SƯ NHỆN 34SC
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:setis-giao-su-nhen-34sc|chemical:spirodiclofen|pest:nhen|pest:white-spider-mite|brand:delta
+
+#20 idx=126 sim=0.3845 tag_score=1 id=million_50wg_vua_r_y_chunk_01 entity=product
+    Q: Sản phẩm Million 50WG hiệu Vua Rầy có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid']
+    tags_v2: product:million-50wg|chemical:flonicamid|pest:sucking-insects|crop:lua|crop:khoai-mi|mechanisms:luu-dan-manh
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+QUERY      :
+Tất cả sản phẩm trị nhện.
+
+MUST TAGS  :
+[]
+
+ANY TAGS   :
+['chemical:buprofezin', 'chemical:dinotefuran', 'chemical:flonicamid', 'chemical:spirotetramat', 'pest:nhen']
+
+2026-01-30 18:34:11
+
