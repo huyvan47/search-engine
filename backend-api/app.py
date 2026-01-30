@@ -19,11 +19,15 @@ from rag.pipeline import answer_with_suggestions, answer_with_suggestions_stream
 openai.api_key = '...'
 
 # thêm path để import module rag
-BASE_DIR = Path(os.environ["BMCVN_BASE"])
+BASE_DIR = Path(os.getenv("BMCVN_BASE", Path(__file__).parent.parent))
 
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 CSV_PATH = BASE_DIR / "rag_logs.csv"
 KB_PATH = BASE_DIR / "data-kd-1-4-25-1-2026-focus-product.npz"
+
+print("CSV_PATH =", CSV_PATH)
+print("CSV exists =", CSV_PATH.exists())
+print("CSV parent exists =", CSV_PATH.parent.exists())
 # Cấu hình Flask
 app = Flask(__name__)
 
@@ -215,8 +219,7 @@ def query_rag_system(user_id, kb, API_KEY, query):
     user_query = query
     openai.api_key = API_KEY
     client = openai
-    KB = "D:/bmcvn-dev/data-kd-1-4-25-1-2026-focus-product.npz"
-    kb = load_npz(KB)   
+    kb = load_npz(KB_PATH)   
     cfg = RAGConfig()
     policy = PolicyV7()
     answer = answer_with_suggestions(
@@ -235,7 +238,7 @@ def process_with_rag( user_id, description):
     if not description:
         return {"error": "Không có mô tả để xử lý."}
 
-    result_from_rag = query_rag_system(user_id, KB, openai.api_key, description)
+    result_from_rag = query_rag_system(user_id, KB_PATH, openai.api_key, description)
 
     # Bảo vệ nếu RAG trả về None
     if result_from_rag is None:
@@ -248,15 +251,16 @@ def process_with_rag_stream(user_id, description):
         yield "Không có mô tả để xử lý."
         return
 
-    # y hệt query_rag_system nhưng dùng answer_with_suggestions_stream
     user_query = description
     openai.api_key = openai.api_key
     client = openai
-    KB = "D:/bmcvn-dev/data-kd-1-4-25-1-2026-focus-product.npz"
-    kb = load_npz(KB)
+    kb = load_npz(str(KB_PATH))
     cfg = RAGConfig()
     policy = PolicyV7()
 
+    full_text = ""
+
+    # gọi streaming
     for chunk in answer_with_suggestions_stream(
         user_id=user_id,
         user_query=user_query,
@@ -265,8 +269,8 @@ def process_with_rag_stream(user_id, description):
         cfg=cfg,
         policy=policy,
     ):
+        full_text += chunk
         yield chunk
-
 
 # Ghi log vào CSV cho phân tích ảnh
 def log_image_analysis_result(image_path, image_description):
@@ -362,7 +366,7 @@ def upload_image():          # Xử lý upload ảnh và câu hỏi từ ngườ
         # Lấy context_build nếu có, nếu không thì truyền rỗng
         context_build = result.get('context_build', "") if isinstance(result, dict) else ""
         append_log_to_csv( # Ghi log kết quả RAG vào CSV
-            CSV_PATH,
+            str(CSV_PATH),
             user_query if user_query else (image_description if image_description else ""),
             norm_query,
             context_build,
@@ -418,7 +422,6 @@ def upload_stream():
         final_query = image_description
     else:
         final_query = user_query
-
     @stream_with_context
     def generate():
         # headers “đẩy stream” nhanh (quan trọng nếu reverse proxy)
@@ -440,7 +443,7 @@ def index():
 if __name__ == '__main__':
     app.run(
         host="127.0.0.1",
-        port=5001,
+        port=5000,
         debug=True,
         threaded=True
     )

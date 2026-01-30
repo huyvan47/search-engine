@@ -20,7 +20,9 @@ from typing import List, Tuple, Dict, Any
 from rag.logging.debug_log import debug_log
 from rag.post_answer.enricher import enrich_answer_if_needed
 from rag.generator import call_finetune_with_context, call_finetune_with_context_stream
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent
 
 FORCE_MUST_TAGS = {
     "mechanisms:luu-dan-manh",
@@ -415,6 +417,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         )
 
     context = build_context_from_hits(hits[:max_ctx])
+    yield f"\n[[CONTEXT_START]]\n{context}\n[[CONTEXT_END]]\n"
     timer.end("build_context running")
 
     timer.start("call_finetune_with_context running")
@@ -587,6 +590,29 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         yield tok
 
     final_answer = "".join(parts)
+
+    try:
+        from rag.logging.logger_csv import append_log_to_csv
+        from run.main import BASE_DIR
+
+        csv_path = str(BASE_DIR / "rag_logs.csv")
+
+        append_log_to_csv(
+            csv_path,
+            user_query,
+            norm_query,
+            context,
+            {
+                "text": final_answer,
+                "route": route,
+                "norm_query": norm_query,
+            },
+            route
+        )
+
+    except Exception as e:
+        print("[RAG CSV LOG ERROR]:", e)
+
 
     # 8) enrich (⚠️ enrich là 1 call LLM nữa nên sẽ “đứng”; có 2 lựa chọn)
     # Option A (khuyến nghị cho streaming mượt): bỏ enrich trong stream
