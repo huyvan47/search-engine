@@ -4084,3 +4084,1104 @@ gpt-4.1
 
 2026-01-30 10:57:51
 
+=== PICKED 15 in stage STRICT ===
+
+=== norm_query: Hướng dẫn sử dụng liều lượng sản phẩm One Hope trên lúa. ===
+
+#01 idx=308 sim=0.6093 tag_score=3 id=xu_ly_mai_onehope_chunk_02__000230 entity=product
+    Q: Liều lượng và cách phun Onehope cho cây mai như thế nào?
+    reason: PASS: matched must_tags=['product:onehope']
+    tags_v2: action:spray|process:foliar-application|object:leaves|crop:mai|product:onehope
+
+#02 idx=526 sim=0.5639 tag_score=3 id=ONEHOPE entity=product
+    Q: ONEHOPE 480SL
+    reason: PASS: matched must_tags=['product:onehope-480sl']
+    tags_v2: product:onehope-480sl|chemical:chlormequat|chemical:ethephon|action:growth-regulation|brand:agrishop
+
+#03 idx=143 sim=0.5097 tag_score=3 id=onehope_480sl_chunk_01 entity=product
+    Q: Onehope 480SL là thuốc gì và có công dụng như thế nào?
+    reason: PASS: matched must_tags=['product:onehope-480sl']
+    tags_v2: product:onehope-480sl|chemical:ethephon|crop:mit|crop:khom|crop:sau-rieng
+
+#04 idx=55 sim=0.4070 tag_score=3 id=laoton_108ec_chunk_01 entity=product
+    Q: Sản phẩm Laoton 108EC có thành phần và công dụng chính là gì?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:laoton-108ec|chemical:haloxyfop-p-methyl|action:weed-control|pest:narrow-leaf-weeds|crop:dau-nanh|crop:peanut|mechanisms:co-chon-loc
+
+#05 idx=411 sim=0.3974 tag_score=3 id=AMESIP entity=product
+    Q: AMESIP 80WP - Voi Rừng
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:amesip-80wp|chemical:ametryn|pest:weeds|crop:mia|brand:agrishop|mechanisms:co-chon-loc
+
+#06 idx=412 sim=0.3946 tag_score=3 id=DURONG entity=product
+    Q: DURONG 800WP
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:durong-800wp|chemical:diuron|crop:mia|brand:agrishop|mechanisms:co-chon-loc
+
+#07 idx=401 sim=0.3924 tag_score=3 id=GANGSTER300EC entity=product
+    Q: GANGSTER300EC
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:gangter-300ec|chemical:pretilachlor|crop:lua|brand:delta|mechanisms:co-chon-loc
+
+#08 idx=59 sim=0.3427 tag_score=3 id=riceup_300ec_hi_u_gangster_300ec_chunk_01 entity=product
+    Q: Riceup 300EC là thuốc gì và có công dụng ra sao?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:riceup-300ec|chemical:pretilachlor|chemical:pretilachlor|chemical:fenclorim|crop:lua|pest:weeds|mechanisms:co-chon-loc
+
+#09 idx=116 sim=0.3405 tag_score=3 id=amesip_80wp_voi_r_ng_chunk_01 entity=product
+    Q: Amesip 80WP (Voi rừng) là thuốc bảo vệ thực vật có đặc điểm gì?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:amesip-80wp|chemical:ametryn|pest:weeds|crop:mia|mechanisms:co-chon-loc
+
+#10 idx=52 sim=0.3152 tag_score=3 id=azin_rio_45sc_anh_h_ng_c_chunk_01 entity=product
+    Q: Azin Rio 45SC hiệu Anh Hùng cỏ có thành phần và công dụng chính là gì?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:azin-rio-45sc|chemical:atrazine|chemical:mesotrione|disease:weed-control|crop:bap|mechanisms:co-chon-loc|brand:delta
+
+#11 idx=61 sim=0.3150 tag_score=3 id=dusan_240ec_chunk_01 entity=product
+    Q: Thuốc Dusan 240EC có thành phần và công dụng chính là gì?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: chemical:lactofen|product:dusan-240ec|action:weed-control|pest:co-la-rong|crop:dau-nanh|mechanisms:co-chon-loc
+
+#12 idx=115 sim=0.3133 tag_score=3 id=dktazole_480sl_vamco_chunk_01 entity=product
+    Q: Dktazole 480SL (Vamco) là thuốc gì và có công dụng ra sao?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: chemical:bentazone|product:vam-co-dktazole-480sl|action:weed-control|crop:lua|crop:dau-nanh|mechanisms:co-chon-loc
+
+#13 idx=53 sim=0.3050 tag_score=3 id=misung_15sc_gi_o_s_c_chunk_01 entity=product
+    Q: Misung 15SC hiệu Giáo Sư Cỏ là thuốc gì và có công dụng như thế nào?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:misung-15sc|chemical:mesotrione|pest:co-la-rong|pest:weeds|mechanisms:co-chon-loc|brand:delta
+
+#14 idx=60 sim=0.2905 tag_score=3 id=gardona_250sl_chunk_01 entity=product
+    Q: Gardona 250SL là thuốc gì và có công dụng như thế nào?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: product:gardona-250sl|chemical:fomesafen|pest:weeds|pest:co-la-rong|crop:dau-nanh|mechanisms:co-chon-loc
+
+#15 idx=165 sim=0.2849 tag_score=3 id=maruka_5ec_chunk_01 entity=product
+    Q: Maruka 5EC là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: matched must_tags=['mechanisms:co-chon-loc']
+    tags_v2: chemical:quizalofop-p-ethyl|product:maruka-5ec|pest:weeds|pest:narrow-leaf-weed|crop:dau-nanh|brand:bmc|brand:phuc-thinh|mechanisms:co-chon-loc
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 15
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: liều lượng và cách sử dụng One Hope trên cây lúa ===
+
+#01 idx=498 sim=0.5188 tag_score=4 id=HELLO_FUNGI entity=product
+    Q: HELLO FUNGI 400
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:hexaconazole', 'crop:lua']
+    tags_v2: product:hello-fungi-400|chemical:azoxystrobin|chemical:hexaconazole|chemical:difenoconazole|crop:lua|brand:agrishop
+
+#02 idx=478 sim=0.4316 tag_score=4 id=NIKO entity=product
+    Q: NIKO 72WP, M8 SING
+    reason: PASS: no must, matched any_tags=['chemical:amisulbrom', 'chemical:chlorothalonil', 'chemical:cymoxanil', 'chemical:mancozeb']
+    tags_v2: product:niko|product:niko-72wp|product:m8-sing|chemical:cymoxanil|chemical:mancozeb|chemical:chlorothalonil|chemical:amisulbrom|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#03 idx=144 sim=0.4211 tag_score=4 id=mitop_one_390sc_hello_fungi_400_chunk_01 entity=product
+    Q: Mitop one 390SC (Hello Fungi 400) là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:hexaconazole', 'crop:lua']
+    tags_v2: produtct:mitop-one-390sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:difenoconazole|disease:lem-lep-hat|crop:lua|disease:nhom-a|disease:nhom-b
+
+#04 idx=146 sim=0.4067 tag_score=4 id=king_cide_japan_460sc_chunk_01 entity=product
+    Q: King-cide Japan 460SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:hexaconazole', 'chemical:tricyclazole', 'crop:lua']
+    tags_v2: product:king-cide-japan-460sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:tricyclazole|crop:lua|disease:nhom-a|disease:nhom-b
+
+#05 idx=363 sim=0.2687 tag_score=4 id=scab_fungicide_chunk_05 entity=disease
+    Q: Các thuốc hỗn hợp dùng để phòng trừ bệnh ghẻ gồm những loại nào?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:propiconazole', 'chemical:pyraclostrobin']
+    tags_v2: disease:ghe|chemical:azoxystrobin|chemical:difenoconazole|chemical:propiconazole|chemical:pyraclostrobin
+
+#06 idx=497 sim=0.4854 tag_score=3 id=KING-CIDE entity=product
+    Q: KING-CIDE JAPAN 460SC
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:hexaconazole', 'chemical:tricyclazole']
+    tags_v2: product:king-cide-japan-460sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:tricyclazole|brand:agrishop
+
+#07 idx=421 sim=0.4662 tag_score=3 id=KAJIO-al-gold entity=product
+    Q: KAJIO 1GR ALPHA, KAJIO 1GR GOLD
+    reason: PASS: no must, matched any_tags=['chemical:avermectin-b1a', 'chemical:avermectin-b1b', 'chemical:emamectin-benzoate']
+    tags_v2: product:kajio-1gr|product:kajio-1gr-alpha|product:kajio-1gr-gold|chemical:emamectin-benzoate|chemical:avermectin-b1a|chemical:avermectin-b1b|brand:delta
+
+#08 idx=500 sim=0.4610 tag_score=3 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must, matched any_tags=['chemical:difenoconazole', 'chemical:propiconazole', 'chemical:tebuconazole']
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#09 idx=490 sim=0.4395 tag_score=3 id=Shonam entity=product
+    Q: Shonam 500SC
+    reason: PASS: no must, matched any_tags=['chemical:fluazinam', 'chemical:special-additives', 'crop:lua']
+    tags_v2: product:shonam-500sc|chemical:fluazinam|chemical:special-additives|crop:lua|brand:delta
+
+#10 idx=457 sim=0.4387 tag_score=3 id=CHESSIN entity=product
+    Q: CHESSIN 600WP
+    reason: PASS: no must, matched any_tags=['chemical:dinotefuran', 'chemical:pymetrozine', 'crop:lua']
+    tags_v2: product:chessin-600wp|chemical:dinotefuran|chemical:pymetrozine|crop:lua|brand:agrishop|mechanisms:luu-dan-manh
+
+#11 idx=455 sim=0.4206 tag_score=3 id=Suparep entity=product
+    Q: Suparep 400WP
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran', 'crop:lua']
+    tags_v2: product:suparep-400wp|chemical:buprofezin|chemical:dinotefuran|pest:ray-nau|crop:lua|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan-manh
+
+#12 idx=215 sim=0.4168 tag_score=3 id=topxapy_30sc_chunk_01 entity=product
+    Q: Topxapy 30SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'chemical:pyriproxyfen', 'crop:lua']
+    tags_v2: product:topxapy-30sc|chemical:chlorfenapyr|chemical:pyriproxyfen|action:insecticide|crop:lua|mechanisms:tiep-xuc
+
+#13 idx=91 sim=0.4149 tag_score=3 id=probicol_200wp_khu_n_v_ng_chunk_02 entity=product
+    Q: Probicol 200WP (Khuẩn Vương) dùng để phòng trừ bệnh gì trên cây trồng nào?
+    reason: PASS: no must, matched any_tags=['chemical:bismerthiazol', 'chemical:kasugamycin', 'crop:lua']
+    tags_v2: product:probicol-200wp|chemical:bismerthiazol|chemical:kasugamycin|disease:bacterial-rot|disease:bacterial-blight|disease:bacterial-spot|crop:lua|mechanisms:dac-tri-khuan
+
+#14 idx=518 sim=0.3900 tag_score=3 id=PHONIX_DRAGON entity=product
+    Q: PHONIX DRAGON 20EC
+    reason: PASS: no must, matched any_tags=['chemical:beta-cypermethrin', 'chemical:phoxim', 'crop:lua']
+    tags_v2: product:phonix-dragon-20ec|chemical:phoxim|chemical:beta-cypermethrin|crop:lua|brand:bmc|brand:phuc-thinh|mechanisms:xong-hoi
+
+#15 idx=134 sim=0.2979 tag_score=3 id=chessin_600wp_chunk_01 entity=product
+    Q: Thuốc Chessin 600WP có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:dinotefuran', 'chemical:pymetrozine', 'crop:lua']
+    tags_v2: product:chessin-600wp|chemical:dinotefuran|chemical:pymetrozine|crop:lua|crop:khoai-mi|crop:ca-phe|mechanisms:luu-dan-manh
+
+#16 idx=486 sim=0.5164 tag_score=2 id=HoangANHVIL entity=product
+    Q: HoangANHVIL 50SC
+    reason: PASS: no must, matched any_tags=['chemical:hexaconazole', 'crop:lua']
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:fungal-infections|crop:lua|brand:bmc|brand:phuc-thinh
+
+#17 idx=525 sim=0.4878 tag_score=2 id=CHOWON entity=product
+    Q: CHOWON 550SL THẦN DƯỢC
+    reason: PASS: no must, matched any_tags=['chemical:chlormequat', 'crop:lua']
+    tags_v2: product:chowon-550sl|chemical:chlormequat|action:growth-regulation|crop:lua|brand:agrishop
+
+#18 idx=524 sim=0.4863 tag_score=2 id=JINHE_BARASS entity=product
+    Q: JINHE-BARASS 0.01SL
+    reason: PASS: no must, matched any_tags=['chemical:24-epibrassinolide', 'crop:lua']
+    tags_v2: product:jinhe-barass-0-01sl|chemical:24-epibrassinolide|crop:lua|crop:durian|brand:agrishop
+
+#19 idx=449 sim=0.4815 tag_score=2 id=fORSAN entity=product
+    Q: fORSAN 60EC, HORiSAN 75
+    reason: PASS: no must, matched any_tags=['chemical:dimethoate', 'chemical:phenthoate']
+    tags_v2: product:forsan-horisan|pest:rep-sap|pest:dao-on|product:forsan-60ec|product:horisan-75|chemical:phenthoate|chemical:dimethoate|crop:rau|brand:bmc|brand:phuc-thinh|brand:delta|mechanisms:xong-hoi-manh
+
+#20 idx=487 sim=0.4768 tag_score=2 id=MEKONGVIL entity=product
+    Q: MEKONGVIL 5SC
+    reason: PASS: no must, matched any_tags=['chemical:hexaconazole', 'crop:lua']
+    tags_v2: product:mekongvil-5sc|chemical:hexaconazole|disease:fungal-diseases|crop:lua|brand:bmc|brand:phuc-thinh
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+QUERY      :
+Hướng dẫn sử dụng liều lượng sản phẩm One Hope trên lúa.
+
+MUST TAGS  :
+['mechanisms:co-chon-loc', 'product:onehope', 'product:onehope-480sl']
+
+ANY TAGS   :
+['chemical:24-epibrassinolide', 'chemical:Paclobutrazol', 'chemical:abamectin', 'chemical:alpha-cypermethrin', 'chemical:amisulbrom', 'chemical:avermectin', 'chemical:avermectin-b1a', 'chemical:avermectin-b1b', 'chemical:azoxystrobin', 'chemical:bacillus-subtilis', 'chemical:bentazone', 'chemical:beta-cypermethrin', 'chemical:bismerthiazol', 'chemical:buprofezin', 'chemical:c10-alcohol-ethoxylate', 'chemical:cartap-hydrochloride', 'chemical:chlorfenapyr', 'chemical:chlormequat', 'chemical:chlorothalonil', 'chemical:chlorpyrifos-methyl', 'chemical:copper', 'chemical:cymoxanil', 'chemical:cypermethrin', 'chemical:difenoconazole', 'chemical:dimethoate', 'chemical:dinotefuran', 'chemical:emamectin-benzoate', 'chemical:fenobucarb', 'chemical:flonicamid', 'chemical:fluazinam', 'chemical:flusilazole', 'chemical:gibberellic-acid', 'chemical:hexaconazole', 'chemical:hymexazol', 'chemical:imidacloprid', 'chemical:insecticide', 'chemical:jingangmycin', 'chemical:kasugamycin', 'chemical:kresoxim-methyl', 'chemical:lime', 'chemical:lufenuron', 'chemical:mancozeb', 'chemical:metaflumizone', 'chemical:metaldehyde', 'chemical:monosultap', 'chemical:niclosamide', 'chemical:nitenpyram', 'chemical:penconazole', 'chemical:permethrin', 'chemical:phenthoate', 'chemical:phoxim', 'chemical:pirimiphos-methyl', 'chemical:pretilachlor', 'chemical:prochloraz-manganese-complex', 'chemical:profenofos', 'chemical:propiconazole', 'chemical:propoxur', 'chemical:pymetrozine', 'chemical:pyraclostrobin', 'chemical:pyriproxyfen', 'chemical:special-additives', 'chemical:spirotetramat', 'chemical:tebuconazole', 'chemical:thiacloprid', 'chemical:thiamethoxam', 'chemical:thiosultap-sodium', 'chemical:thiram', 'chemical:tolfenpyrad', 'chemical:triadimefon', 'chemical:tricyclazole', 'chemical:trioxystrobin', 'chemical:zhongshengmycin', 'crop:lua']
+
+gpt-4.1
+
+2026-01-30 14:02:47
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Thuốc xử lý bọ trĩ trên hoa hồng. ===
+
+#01 idx=259 sim=0.5825 tag_score=0 id=sau_hai_05_ray_lung_trang_02__000172 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:luu-dan-manh|object:exami|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#02 idx=290 sim=0.5662 tag_score=0 id=sau_hai_05_sung_33__000201 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:fumigation|action:watering|object:water|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#03 idx=272 sim=0.5593 tag_score=0 id=sau_hai_05_tri_15__000185 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|pest:bo-tri|formula:cong-thuc-bo-tri|product:zigen-super|product:nofara|mechanisms:tiep-xuc-luu-dan-manh
+
+#04 idx=207 sim=0.5538 tag_score=0 id=trinong_50wp_carbendazim_chunk_01 entity=product
+    Q: Trinong 50WP là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: product:trinong-50wp|chemical:prochloraz-manganesse-complex|disease:blast|disease:leaf-spot|disease:anthracnose|disease:powdery-mildew|disease:nhom-a|disease:nhom-b
+
+#05 idx=291 sim=0.5524 tag_score=0 id=sau_hai_05_sung_34__000202 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|crop:khoai-lang|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#06 idx=500 sim=0.5518 tag_score=0 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must/any provided
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#07 idx=289 sim=0.5441 tag_score=0 id=sau_hai_05_sung_32__000200 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:fumigation|action:apply|object:granular-formulation|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#08 idx=486 sim=0.5416 tag_score=0 id=HoangANHVIL entity=product
+    Q: HoangANHVIL 50SC
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:fungal-infections|crop:lua|brand:bmc|brand:phuc-thinh
+
+#09 idx=204 sim=0.5384 tag_score=0 id=hoanganhvil_50sc_anhvil_th_y_s_chunk_01 entity=product
+    Q: Thuốc Hoanganhvil 50SC (Anhvil Thụy Sĩ) có thành phần và công dụng chính là gì?
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:rust|disease:powdery-mildew
+
+#10 idx=260 sim=0.5361 tag_score=0 id=sau_hai_05_ray_lung_trang_03__000173 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|mechanisms:luu-dan-manh|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#11 idx=277 sim=0.5354 tag_score=0 id=sau_hai_07_bo_nhay__000190 entity=product
+    Q: Xử lý Bọ nhảy như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|pest:bo-nhay|formula:cong-thuc-bo-nhay|product:binhtox-gold|product:kajio-5ec|product:tomi|additive:chat-bam-dinh
+
+#12 idx=258 sim=0.5330 tag_score=0 id=sau_hai_05_ray_lung_trang_01__000171 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ bình thường hoặc cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:xu-ly|mechanisms:luu-dan-manh|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#13 idx=451 sim=0.5309 tag_score=0 id=trum_chich_hut entity=product
+    Q: TRÙM CHÍCH HÚT - TRĨ
+    reason: PASS: no must/any provided
+    tags_v2: product:trum-chich-hut-tri|chemical:pymetrozine|pest:bo-tri|pest:aphids|crop:cay-an-qua|brand:delta
+
+#14 idx=275 sim=0.5293 tag_score=0 id=sau_hai_05_sau_to_19__000188 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:bacillus|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#15 idx=91 sim=0.5266 tag_score=0 id=probicol_200wp_khu_n_v_ng_chunk_02 entity=product
+    Q: Probicol 200WP (Khuẩn Vương) dùng để phòng trừ bệnh gì trên cây trồng nào?
+    reason: PASS: no must/any provided
+    tags_v2: product:probicol-200wp|chemical:bismerthiazol|chemical:kasugamycin|disease:bacterial-rot|disease:bacterial-blight|disease:bacterial-spot|crop:lua|mechanisms:dac-tri-khuan
+
+#16 idx=348 sim=0.5225 tag_score=0 id=citrus_green_blue_mold_chunk_04 entity=disease
+    Q: Biện pháp phòng trừ bệnh mốc xanh và mốc xanh lam hiệu quả là gì?
+    reason: PASS: no must/any provided
+    tags_v2: disease:blue-mold|disease:green-mold|crop:citrus|action:harvest-handling|action:packaging
+
+#17 idx=274 sim=0.5208 tag_score=0 id=sau_hai_05_sau_to_18__000187 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:steam-fumigation|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#18 idx=86 sim=0.5200 tag_score=0 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#19 idx=276 sim=0.5196 tag_score=0 id=sau_hai_06_sau_hanh__000189 entity=product
+    Q: Xử lý Sâu hành (rất kháng) như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:tiep-xuc|pest:sau-hanh|formula:cong-thuc-sau-hanh|product:binhtox-gold|product:kajio-5ec|product:tomi|additive:chat-bam-dinh
+
+#20 idx=492 sim=0.5195 tag_score=0 id=TOPXIM entity=product
+    Q: TOPXIM PRO 30SC
+    reason: PASS: no must/any provided
+    tags_v2: product:topxim-pro-30sc|chemical:kresoxim-methyl|pest:suong-mai|pest:dao-on|pest:phan-trang|crop:rau-muong|brand:delta
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: thuốc đặc trị bọ trĩ trên hoa hồng hiệu quả ===
+
+#01 idx=451 sim=0.5010 tag_score=2 id=trum_chich_hut entity=product
+    Q: TRÙM CHÍCH HÚT - TRĨ
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:trum-chich-hut-tri|chemical:pymetrozine|pest:bo-tri|pest:aphids|crop:cay-an-qua|brand:delta
+
+#02 idx=159 sim=0.4761 tag_score=2 id=kyodo_50wp_chunk_01 entity=product
+    Q: Thuốc BVTV Kyodo 50WP có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:diafenthiuron', 'pest:bo-tri']
+    tags_v2: chemical:diafenthiuron|product:kyodo-50wp|pest:bo-tri|pest:nhen|pest:white-spider-mite
+
+#03 idx=456 sim=0.4720 tag_score=2 id=KHONGRAY entity=product
+    Q: KHONGRAY 54WP
+    reason: PASS: no must, matched any_tags=['chemical:acetamiprid', 'pest:bo-tri']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:acetamiprid|pest:bo-tri|brand:agrishop|mechanisms:luu-dan-manh
+
+#04 idx=464 sim=0.4601 tag_score=2 id=SUPAREP entity=product
+    Q: SUPAREP 22.4SC
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:suparep-22-4sc|chemical:spirotetramat|pest:aphid|pest:bo-tri|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan
+
+#05 idx=68 sim=0.4587 tag_score=2 id=exami_20wg_l_ti_u_long_chunk_01 entity=product
+    Q: Exami 20WG (Lý Tiểu Long) là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid', 'pest:bo-tri']
+    tags_v2: product:exami-20wg-ly-tieu-long|chemical:flonicamid|pest:whitefly|pest:aphid|pest:bo-tri|mechanisms:luu-dan-manh
+
+#06 idx=454 sim=0.4538 tag_score=2 id=TOSI entity=product
+    Q: TOSI 30WG, HASEIDN GOLD
+    reason: PASS: no must, matched any_tags=['chemical:acetamiprid', 'pest:bo-tri']
+    tags_v2: product:tosi|product:tosi-30wg|product:haseidn-gold|chemical:acetamiprid|pest:bo-tri|crop:rau|brand:bmc|brand:phuc-thinh|brand:agrishop|mechanisms:luu-dan
+
+#07 idx=430 sim=0.4412 tag_score=2 id=sieu_diet_sau entity=product
+    Q: Siêu diệt sâu
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:sieu-diet-sau|chemical:spirotetramat|chemical:tolfenpyrad|pest:leaf-folder|pest:bo-tri|brand:delta
+
+#08 idx=133 sim=0.4399 tag_score=2 id=khongray_54wp_chunk_01 entity=product
+    Q: Thuốc Khongray 54WP có thành phần và công dụng chính như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:dinotefuran', 'pest:bo-tri']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:dinotefuran|pest:aphid|pest:bo-tri|pest:leafhopper|mechanisms:luu-dan-manh
+
+#09 idx=418 sim=0.4388 tag_score=2 id=bao_den entity=product
+    Q: BÁO ĐEN
+    reason: PASS: no must, matched any_tags=['chemical:abamectin', 'pest:bo-tri']
+    tags_v2: product:bao-den|chemical:abamectin|pest:leaf-miner|pest:bo-tri|pest:sau-ve-bua|pest:sau-hanh|brand:delta
+
+#10 idx=463 sim=0.4379 tag_score=2 id=Ecudor entity=product
+    Q: Ecudor 22.4SC
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:ecudor-22-4sc|chemical:spirotetramat|pest:aphids|pest:bo-tri|brand:delta
+
+#11 idx=80 sim=0.4326 tag_score=2 id=suparep_22_4sc_chunk_01 entity=product
+    Q: Suparep 22.4SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:suparep-22-4sc|chemical:spirotetramat|pest:aphid|pest:bo-tri|pest:mite|mechanisms:luu-dan
+
+#12 idx=435 sim=0.4318 tag_score=2 id=OHAYO entity=product
+    Q: OHAYO 100SC
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'pest:bo-tri']
+    tags_v2: product:ohayo-100sc|chemical:chlorfenapyr|pest:bo-tri|pest:white-mite|brand:bmc|mechanisms:tiep-xuc-luu-dan-manh
+
+#13 idx=163 sim=0.4258 tag_score=2 id=koto_gold_240sc_chunk_01 entity=product
+    Q: Thuốc BVTV Koto Gold 240SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:thiacloprid', 'pest:bo-tri']
+    tags_v2: product:koto-gold-240sc|chemical:thiacloprid|pest:aphids|pest:bo-tri
+
+#14 idx=458 sim=0.4241 tag_score=2 id=ram_te_thien entity=product
+    Q: RAM TỀ THIÊN
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:ram-te-thien|chemical:pymetrozine|pest:bo-tri|pest:whitefly|pest:bo-phan|crop:rau|brand:bmc|brand:phuc-thinh|brand:delta
+
+#15 idx=109 sim=0.4241 tag_score=2 id=igro_240sc_xpro_ho_ng_t_s_u_chunk_01 entity=product
+    Q: Igro 240SC Xpro (Hoàng Tử Sâu) là thuốc BVTV có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'pest:bo-tri']
+    tags_v2: product:igro-240sc-xpro|chemical:chlorfenapyr|pest:bo-tri|crop:tea|crop:durian|mechanisms:tiep-xuc-luu-dan-manh
+
+#16 idx=174 sim=0.4157 tag_score=2 id=kyodo_25sc_i_b_ng_kydo_chunk_01 entity=product
+    Q: Sản phẩm Kyodo 25SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:diafenthiuron', 'pest:bo-tri']
+    tags_v2: product:kyodo-25sc|chemical:diafenthiuron|pest:bo-tri|pest:nhen|pest:white-spider-mite|mechanisms:tiep-xuc
+
+#17 idx=215 sim=0.4143 tag_score=2 id=topxapy_30sc_chunk_01 entity=product
+    Q: Topxapy 30SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'chemical:pyriproxyfen']
+    tags_v2: product:topxapy-30sc|chemical:chlorfenapyr|chemical:pyriproxyfen|action:insecticide|crop:lua|mechanisms:tiep-xuc
+
+#18 idx=175 sim=0.4124 tag_score=2 id=oscare_600wg_ram_th_i_chunk_01 entity=product
+    Q: Oscare 600WG (Ram Thái) là thuốc bảo vệ thực vật có thành phần hoạt chất nào và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:oscare-600wg|chemical:pymetrozine|pest:bo-tri|pest:whitefly|pest:aphid|brand:phuc-thinh|mechanisms:luu-dan
+
+#19 idx=416 sim=0.4041 tag_score=2 id=Abinsec entity=product
+    Q: Abinsec 1.8EC, OxaTIr1 1.8EC
+    reason: PASS: no must, matched any_tags=['chemical:abamectin', 'pest:bo-tri']
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:leaf-folder|pest:bo-tri|pest:sau-duc-than|pest:sau-to|crop:vegetable|brand:delta|mechanisms:tiep-xuc
+
+#20 idx=179 sim=0.4023 tag_score=2 id=haihamec_3_6ec_abalion_n_c_trong_n_c_chunk_01 entity=product
+    Q: Sản phẩm Haihamec 3.6EC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:abamectin', 'pest:bo-tri']
+    tags_v2: product:haihamec-3-6ec|chemical:abamectin|pest:leaf-folder|pest:green-bug|pest:bo-tri|mechanisms:tiep-xuc
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+QUERY      :
+Thuốc xử lý bọ trĩ trên hoa hồng.
+
+MUST TAGS  :
+[]
+
+ANY TAGS   :
+['chemical:abamectin', 'chemical:acetamiprid', 'chemical:avermectin-b1b', 'chemical:chlorfenapyr', 'chemical:diafenthiuron', 'chemical:dinotefuran', 'chemical:emamectin-benzoate', 'chemical:flonicamid', 'chemical:pymetrozine', 'chemical:pyriproxyfen', 'chemical:spirotetramat', 'chemical:thiacloprid', 'crop:hoa-hong', 'pest:bo-tri']
+
+gpt-4.1
+
+2026-01-30 14:36:00
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Thuốc xử lý bọ trĩ trên hoa hồng. ===
+
+#01 idx=259 sim=0.5824 tag_score=0 id=sau_hai_05_ray_lung_trang_02__000172 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:luu-dan-manh|object:exami|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#02 idx=290 sim=0.5661 tag_score=0 id=sau_hai_05_sung_33__000201 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:fumigation|action:watering|object:water|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#03 idx=272 sim=0.5593 tag_score=0 id=sau_hai_05_tri_15__000185 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|pest:bo-tri|formula:cong-thuc-bo-tri|product:zigen-super|product:nofara|mechanisms:tiep-xuc-luu-dan-manh
+
+#04 idx=207 sim=0.5538 tag_score=0 id=trinong_50wp_carbendazim_chunk_01 entity=product
+    Q: Trinong 50WP là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: product:trinong-50wp|chemical:prochloraz-manganesse-complex|disease:blast|disease:leaf-spot|disease:anthracnose|disease:powdery-mildew|disease:nhom-a|disease:nhom-b
+
+#05 idx=291 sim=0.5524 tag_score=0 id=sau_hai_05_sung_34__000202 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|crop:khoai-lang|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#06 idx=500 sim=0.5518 tag_score=0 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must/any provided
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#07 idx=289 sim=0.5440 tag_score=0 id=sau_hai_05_sung_32__000200 entity=product
+    Q: Xử lý Sùng; bọ hà như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:fumigation|action:apply|object:granular-formulation|pest:bo-ha|formula:cong-thuc-sung|formula:cong-thuc-bo-ha
+
+#08 idx=486 sim=0.5416 tag_score=0 id=HoangANHVIL entity=product
+    Q: HoangANHVIL 50SC
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:fungal-infections|crop:lua|brand:bmc|brand:phuc-thinh
+
+#09 idx=204 sim=0.5383 tag_score=0 id=hoanganhvil_50sc_anhvil_th_y_s_chunk_01 entity=product
+    Q: Thuốc Hoanganhvil 50SC (Anhvil Thụy Sĩ) có thành phần và công dụng chính là gì?
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:rust|disease:powdery-mildew
+
+#10 idx=260 sim=0.5360 tag_score=0 id=sau_hai_05_ray_lung_trang_03__000173 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|mechanisms:luu-dan-manh|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#11 idx=277 sim=0.5354 tag_score=0 id=sau_hai_07_bo_nhay__000190 entity=product
+    Q: Xử lý Bọ nhảy như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|pest:bo-nhay|formula:cong-thuc-bo-nhay|product:binhtox-gold|product:kajio-5ec|product:tomi|additive:chat-bam-dinh
+
+#12 idx=258 sim=0.5329 tag_score=0 id=sau_hai_05_ray_lung_trang_01__000171 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ bình thường hoặc cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:xu-ly|mechanisms:luu-dan-manh|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#13 idx=451 sim=0.5310 tag_score=0 id=trum_chich_hut entity=product
+    Q: TRÙM CHÍCH HÚT - TRĨ
+    reason: PASS: no must/any provided
+    tags_v2: product:trum-chich-hut-tri|chemical:pymetrozine|pest:bo-tri|pest:aphids|crop:cay-an-qua|brand:delta
+
+#14 idx=275 sim=0.5293 tag_score=0 id=sau_hai_05_sau_to_19__000188 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:bacillus|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#15 idx=91 sim=0.5265 tag_score=0 id=probicol_200wp_khu_n_v_ng_chunk_02 entity=product
+    Q: Probicol 200WP (Khuẩn Vương) dùng để phòng trừ bệnh gì trên cây trồng nào?
+    reason: PASS: no must/any provided
+    tags_v2: product:probicol-200wp|chemical:bismerthiazol|chemical:kasugamycin|disease:bacterial-rot|disease:bacterial-blight|disease:bacterial-spot|crop:lua|mechanisms:dac-tri-khuan
+
+#16 idx=348 sim=0.5224 tag_score=0 id=citrus_green_blue_mold_chunk_04 entity=disease
+    Q: Biện pháp phòng trừ bệnh mốc xanh và mốc xanh lam hiệu quả là gì?
+    reason: PASS: no must/any provided
+    tags_v2: disease:blue-mold|disease:green-mold|crop:citrus|action:harvest-handling|action:packaging
+
+#17 idx=274 sim=0.5208 tag_score=0 id=sau_hai_05_sau_to_18__000187 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:steam-fumigation|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#18 idx=86 sim=0.5199 tag_score=0 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#19 idx=276 sim=0.5196 tag_score=0 id=sau_hai_06_sau_hanh__000189 entity=product
+    Q: Xử lý Sâu hành (rất kháng) như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:tiep-xuc|pest:sau-hanh|formula:cong-thuc-sau-hanh|product:binhtox-gold|product:kajio-5ec|product:tomi|additive:chat-bam-dinh
+
+#20 idx=492 sim=0.5195 tag_score=0 id=TOPXIM entity=product
+    Q: TOPXIM PRO 30SC
+    reason: PASS: no must/any provided
+    tags_v2: product:topxim-pro-30sc|chemical:kresoxim-methyl|pest:suong-mai|pest:dao-on|pest:phan-trang|crop:rau-muong|brand:delta
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: thuốc đặc trị bọ trĩ trên hoa hồng ===
+
+#01 idx=451 sim=0.5021 tag_score=2 id=trum_chich_hut entity=product
+    Q: TRÙM CHÍCH HÚT - TRĨ
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:trum-chich-hut-tri|chemical:pymetrozine|pest:bo-tri|pest:aphids|crop:cay-an-qua|brand:delta
+
+#02 idx=159 sim=0.4723 tag_score=2 id=kyodo_50wp_chunk_01 entity=product
+    Q: Thuốc BVTV Kyodo 50WP có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:diafenthiuron', 'pest:bo-tri']
+    tags_v2: chemical:diafenthiuron|product:kyodo-50wp|pest:bo-tri|pest:nhen|pest:white-spider-mite
+
+#03 idx=456 sim=0.4690 tag_score=2 id=KHONGRAY entity=product
+    Q: KHONGRAY 54WP
+    reason: PASS: no must, matched any_tags=['chemical:acetamiprid', 'pest:bo-tri']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:acetamiprid|pest:bo-tri|brand:agrishop|mechanisms:luu-dan-manh
+
+#04 idx=454 sim=0.4586 tag_score=2 id=TOSI entity=product
+    Q: TOSI 30WG, HASEIDN GOLD
+    reason: PASS: no must, matched any_tags=['chemical:acetamiprid', 'pest:bo-tri']
+    tags_v2: product:tosi|product:tosi-30wg|product:haseidn-gold|chemical:acetamiprid|pest:bo-tri|crop:rau|brand:bmc|brand:phuc-thinh|brand:agrishop|mechanisms:luu-dan
+
+#05 idx=464 sim=0.4570 tag_score=2 id=SUPAREP entity=product
+    Q: SUPAREP 22.4SC
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:suparep-22-4sc|chemical:spirotetramat|pest:aphid|pest:bo-tri|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan
+
+#06 idx=418 sim=0.4517 tag_score=2 id=bao_den entity=product
+    Q: BÁO ĐEN
+    reason: PASS: no must, matched any_tags=['chemical:abamectin', 'pest:bo-tri']
+    tags_v2: product:bao-den|chemical:abamectin|pest:leaf-miner|pest:bo-tri|pest:sau-ve-bua|pest:sau-hanh|brand:delta
+
+#07 idx=435 sim=0.4516 tag_score=2 id=OHAYO entity=product
+    Q: OHAYO 100SC
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'pest:bo-tri']
+    tags_v2: product:ohayo-100sc|chemical:chlorfenapyr|pest:bo-tri|pest:white-mite|brand:bmc|mechanisms:tiep-xuc-luu-dan-manh
+
+#08 idx=68 sim=0.4506 tag_score=2 id=exami_20wg_l_ti_u_long_chunk_01 entity=product
+    Q: Exami 20WG (Lý Tiểu Long) là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid', 'pest:bo-tri']
+    tags_v2: product:exami-20wg-ly-tieu-long|chemical:flonicamid|pest:whitefly|pest:aphid|pest:bo-tri|mechanisms:luu-dan-manh
+
+#09 idx=463 sim=0.4474 tag_score=2 id=Ecudor entity=product
+    Q: Ecudor 22.4SC
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:ecudor-22-4sc|chemical:spirotetramat|pest:aphids|pest:bo-tri|brand:delta
+
+#10 idx=133 sim=0.4471 tag_score=2 id=khongray_54wp_chunk_01 entity=product
+    Q: Thuốc Khongray 54WP có thành phần và công dụng chính như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:dinotefuran', 'pest:bo-tri']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:dinotefuran|pest:aphid|pest:bo-tri|pest:leafhopper|mechanisms:luu-dan-manh
+
+#11 idx=80 sim=0.4394 tag_score=2 id=suparep_22_4sc_chunk_01 entity=product
+    Q: Suparep 22.4SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:suparep-22-4sc|chemical:spirotetramat|pest:aphid|pest:bo-tri|pest:mite|mechanisms:luu-dan
+
+#12 idx=458 sim=0.4364 tag_score=2 id=ram_te_thien entity=product
+    Q: RAM TỀ THIÊN
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:ram-te-thien|chemical:pymetrozine|pest:bo-tri|pest:whitefly|pest:bo-phan|crop:rau|brand:bmc|brand:phuc-thinh|brand:delta
+
+#13 idx=163 sim=0.4333 tag_score=2 id=koto_gold_240sc_chunk_01 entity=product
+    Q: Thuốc BVTV Koto Gold 240SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:thiacloprid', 'pest:bo-tri']
+    tags_v2: product:koto-gold-240sc|chemical:thiacloprid|pest:aphids|pest:bo-tri
+
+#14 idx=215 sim=0.4325 tag_score=2 id=topxapy_30sc_chunk_01 entity=product
+    Q: Topxapy 30SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'chemical:pyriproxyfen']
+    tags_v2: product:topxapy-30sc|chemical:chlorfenapyr|chemical:pyriproxyfen|action:insecticide|crop:lua|mechanisms:tiep-xuc
+
+#15 idx=430 sim=0.4258 tag_score=2 id=sieu_diet_sau entity=product
+    Q: Siêu diệt sâu
+    reason: PASS: no must, matched any_tags=['chemical:spirotetramat', 'pest:bo-tri']
+    tags_v2: product:sieu-diet-sau|chemical:spirotetramat|chemical:tolfenpyrad|pest:leaf-folder|pest:bo-tri|brand:delta
+
+#16 idx=174 sim=0.4184 tag_score=2 id=kyodo_25sc_i_b_ng_kydo_chunk_01 entity=product
+    Q: Sản phẩm Kyodo 25SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:diafenthiuron', 'pest:bo-tri']
+    tags_v2: product:kyodo-25sc|chemical:diafenthiuron|pest:bo-tri|pest:nhen|pest:white-spider-mite|mechanisms:tiep-xuc
+
+#17 idx=109 sim=0.4183 tag_score=2 id=igro_240sc_xpro_ho_ng_t_s_u_chunk_01 entity=product
+    Q: Igro 240SC Xpro (Hoàng Tử Sâu) là thuốc BVTV có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:chlorfenapyr', 'pest:bo-tri']
+    tags_v2: product:igro-240sc-xpro|chemical:chlorfenapyr|pest:bo-tri|crop:tea|crop:durian|mechanisms:tiep-xuc-luu-dan-manh
+
+#18 idx=416 sim=0.4119 tag_score=2 id=Abinsec entity=product
+    Q: Abinsec 1.8EC, OxaTIr1 1.8EC
+    reason: PASS: no must, matched any_tags=['chemical:abamectin', 'pest:bo-tri']
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:leaf-folder|pest:bo-tri|pest:sau-duc-than|pest:sau-to|crop:vegetable|brand:delta|mechanisms:tiep-xuc
+
+#19 idx=457 sim=0.4079 tag_score=2 id=CHESSIN entity=product
+    Q: CHESSIN 600WP
+    reason: PASS: no must, matched any_tags=['chemical:dinotefuran', 'chemical:pymetrozine']
+    tags_v2: product:chessin-600wp|chemical:dinotefuran|chemical:pymetrozine|crop:lua|brand:agrishop|mechanisms:luu-dan-manh
+
+#20 idx=175 sim=0.4074 tag_score=2 id=oscare_600wg_ram_th_i_chunk_01 entity=product
+    Q: Oscare 600WG (Ram Thái) là thuốc bảo vệ thực vật có thành phần hoạt chất nào và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:pymetrozine', 'pest:bo-tri']
+    tags_v2: product:oscare-600wg|chemical:pymetrozine|pest:bo-tri|pest:whitefly|pest:aphid|brand:phuc-thinh|mechanisms:luu-dan
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Sản phẩm trị đạo ôn. ===
+
+#01 idx=504 sim=0.4846 tag_score=0 id=BAEMSING entity=product
+    Q: BAEMSING 75WP, THÁNH ĐẠO ÔN 75WP
+    reason: PASS: no must/any provided
+    tags_v2: product:baemsing|product:baemsing-75wp|product:thanh-dao-on-75wp|chemical:tricyclazole|disease:dao-on-la|brand:agrishop
+
+#02 idx=272 sim=0.4456 tag_score=0 id=sau_hai_05_tri_15__000185 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|pest:bo-tri|formula:cong-thuc-bo-tri|product:zigen-super|product:nofara|mechanisms:tiep-xuc-luu-dan-manh
+
+#03 idx=275 sim=0.4390 tag_score=0 id=sau_hai_05_sau_to_19__000188 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:bacillus|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#04 idx=530 sim=0.4349 tag_score=0 id=Oosaka entity=product
+    Q: Oosaka 700WP, Snoil Delta Thụy Sĩ
+    reason: PASS: no must/any provided
+    tags_v2: product:Oosaka|product:oosaka-700wp|product:snoil-delta-thuy-si|chemical:niclosamide|disease:oc-buou-vang|crop:lua|brand:bmc|brand:phuc-thinh|brand:delta
+
+#05 idx=287 sim=0.4348 tag_score=0 id=sau_hai_05_sau_duc_qua_30__000198 entity=product
+    Q: Xử lý Sâu đục thân, sâu đục quả/ cây ăn trái  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|disease:stem-borer|disease:fruit-borer|pest:sau-duc-than|pest:sau-cuon-la|formula:cong-thuc-sau-cuon-la|formula:cong-thuc-sau-duc-than|mechanisms:tiep-xuc-manh
+
+#06 idx=500 sim=0.4303 tag_score=0 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must/any provided
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#07 idx=271 sim=0.4294 tag_score=0 id=sau_hai_05_tri_14__000184 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:contact-systemic-action|action:control|object:pesticide|pest:bo-tri|formula:cong-thuc-bo-tri|product:oxatin|mechanisms:tiep-xuc-luu-dan-manh
+
+#08 idx=295 sim=0.4287 tag_score=0 id=sau_hai_05_oc_sen_38__000206 entity=product
+    Q: Xử lý Ốc sên; ốc ma; ốc nhớt (không vỏ) / rẫy; cây ăn trái  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: ["action:apply", "process:pest-control", "object:slug-bait", "pest:oc-sen", "crop:fruit-tree", "formula:cong-thuc-oc-sen", "formula:cong-thuc-oc-ma", "formula:cong-thuc-oc-nhot",]
+
+#09 idx=274 sim=0.4240 tag_score=0 id=sau_hai_05_sau_to_18__000187 entity=product
+    Q: Xử lý Sâu tơ như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:steam-fumigation|pest:sau-to|formula:cong-thuc-sau-to|product:binhtox-gold|product:oxatin
+
+#10 idx=263 sim=0.4229 tag_score=0 id=sau_hai_05_ray_chong_canh_06__000176 entity=product
+    Q: Xử lý Rầy xanh; rầy chổng cánh; rầy phấn; rầy mềm, bọ phấn khi mật độ cao hơn như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:insecticide-application|object:insecticide|pest:ray-xanh|formula:cong-thuc-ray-xanh|formula:cong-thuc-ray-chong-canh|formula:cong-thuc-ray-phan|formula:cong-thuc-ray-mem|formula:cong-thuc-bo-phan-trang|formula:cong-thuc-bo-xit
+
+#11 idx=293 sim=0.4222 tag_score=0 id=sau_hai_05_nhen_36__000204 entity=product
+    Q: Xử lý Nhện  kháng cao; nhiều nhện   như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:pest-control|pest:nhen|formula:cong-thuc-nhen-khang-cao|chemical:abamectin|product:abinsec-sieu-diet-nhen
+
+#12 idx=276 sim=0.4222 tag_score=0 id=sau_hai_06_sau_hanh__000189 entity=product
+    Q: Xử lý Sâu hành (rất kháng) như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:tiep-xuc|pest:sau-hanh|formula:cong-thuc-sau-hanh|product:binhtox-gold|product:kajio-5ec|product:tomi|additive:chat-bam-dinh
+
+#13 idx=503 sim=0.4144 tag_score=0 id=ACO_ONE400 entity=product
+    Q: ACO ONE400EC
+    reason: PASS: no must/any provided
+    tags_v2: product:aco-one400ec|chemical:isoprothiolane|disease:rice-blast|crop:lua|brand:agrishop
+
+#14 idx=278 sim=0.4136 tag_score=0 id=sau_hai_05_sau_cuon_la_23__000189 entity=product
+    Q: Xử lý Sâu cuốn lá; sâu đục thân/ lúa - Rất hay kháng thuốc khi mật độ bình thường như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:chemical-application|pest:sau-duc-than|pest:sau-cuon-la|formula:cong-thuc-sau-cuon-la|formula:cong-thuc-sau-duc-than|object:oxatin|crop:lua
+
+#15 idx=259 sim=0.4132 tag_score=0 id=sau_hai_05_ray_lung_trang_02__000172 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:luu-dan-manh|object:exami|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+#16 idx=310 sim=0.4125 tag_score=0 id=san_pham_chuoi_chunk_01__000234 entity=product
+    Q: Những sản phẩm nào giúp cải thiện chất lượng trái chuối?
+    reason: PASS: no must/any provided
+    tags_v2: process:post-harvest-preservation|crop:banana|chemical:pyraclostrobin|chemical:iprodione
+
+#17 idx=83 sim=0.4023 tag_score=0 id=zigen_xpro_th_nh_s_u_15sc_delta_24ml_g_i_100ml_v_ng_240ml_chai_t_m_chunk_01 entity=product
+    Q: Sản phẩm Zigen Xpro (Thánh Sâu) 15SC Delta là thuốc gì và có công dụng như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: product:zigen-xpro|chemical:tolfenpyrad|pest:sau-xanh|pest:sau-cuon-la|pest:sau-duc-than|mechanisms:tiep-xuc-manh|mechanisms:dac-tri-sau
+
+#18 idx=156 sim=0.4013 tag_score=0 id=aco_one_40ec_thay_th_cho_t_n_c_isoone_chunk_01 entity=product
+    Q: Sản phẩm Aco one 40EC là thuốc bảo vệ thực vật có đặc điểm gì nổi bật?
+    reason: PASS: no must/any provided
+    tags_v2: product:aco-one-40ec|chemical:isoprothiolane|disease:dao-on-la|disease:dao-on-co-bong|crop:lua
+
+#19 idx=43 sim=0.4004 tag_score=0 id=kenbast_15sl_khai_hoang_q10_chunk_01 entity=product
+    Q: Khai hoang Q10 là thuốc gì và có công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:khai-hoang-q10|chemical:glufosinate-ammonium|pest:weeds|pest:co-la-rong|pest:narrowleaf-weed|mechanisms:khong-chon-loc
+
+#20 idx=294 sim=0.3975 tag_score=0 id=sau_hai_05_oc_buu_vang_37__000205 entity=product
+    Q: Xử lý Ốc bưu vàng / Lúa  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:spraying|action:spreading|crop:lua|pest:oc-buou-vang|chemical:abamectin|formula:cong-thuc-oc-buu-vang
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: thành phần và cách dùng sản phẩm trị đạo ôn ===
+
+#01 idx=363 sim=0.3611 tag_score=4 id=scab_fungicide_chunk_05 entity=disease
+    Q: Các thuốc hỗn hợp dùng để phòng trừ bệnh ghẻ gồm những loại nào?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:propiconazole', 'chemical:pyraclostrobin']
+    tags_v2: disease:ghe|chemical:azoxystrobin|chemical:difenoconazole|chemical:propiconazole|chemical:pyraclostrobin
+
+#02 idx=500 sim=0.4667 tag_score=3 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must, matched any_tags=['chemical:difenoconazole', 'chemical:propiconazole', 'chemical:tebuconazole']
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#03 idx=497 sim=0.4247 tag_score=3 id=KING-CIDE entity=product
+    Q: KING-CIDE JAPAN 460SC
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:hexaconazole', 'chemical:tricyclazole']
+    tags_v2: product:king-cide-japan-460sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:tricyclazole|brand:agrishop
+
+#04 idx=146 sim=0.4155 tag_score=3 id=king_cide_japan_460sc_chunk_01 entity=product
+    Q: King-cide Japan 460SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:hexaconazole', 'chemical:tricyclazole']
+    tags_v2: product:king-cide-japan-460sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:tricyclazole|crop:lua|disease:nhom-a|disease:nhom-b
+
+#05 idx=498 sim=0.4128 tag_score=3 id=HELLO_FUNGI entity=product
+    Q: HELLO FUNGI 400
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:hexaconazole']
+    tags_v2: product:hello-fungi-400|chemical:azoxystrobin|chemical:hexaconazole|chemical:difenoconazole|crop:lua|brand:agrishop
+
+#06 idx=144 sim=0.3805 tag_score=3 id=mitop_one_390sc_hello_fungi_400_chunk_01 entity=product
+    Q: Mitop one 390SC (Hello Fungi 400) là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'chemical:hexaconazole']
+    tags_v2: produtct:mitop-one-390sc|chemical:azoxystrobin|chemical:hexaconazole|chemical:difenoconazole|disease:lem-lep-hat|crop:lua|disease:nhom-a|disease:nhom-b
+
+#07 idx=494 sim=0.3750 tag_score=3 id=Afenzole_top entity=product
+    Q: Afenzole Top 325SC, Asmilka Top 325SC
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'disease:dao-on']
+    tags_v2: product:Afenzole|product:afenzole-top-325sc|product:asmilka-top-325sc|chemical:azoxystrobin|chemical:difenoconazole|disease:lem-lep-hat|disease:dao-on|brand:delta
+
+#08 idx=211 sim=0.3572 tag_score=3 id=mi_stop_350sc_chunk_01 entity=product
+    Q: Mi Stop 350SC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole', 'disease:dao-on']
+    tags_v2: product:mi-stop-350sc|chemical:difenoconazole|chemical:azoxystrobin|disease:lem-lep-hat|disease:dao-on
+
+#09 idx=155 sim=0.4259 tag_score=2 id=cocosieu_15_5wp_chunk_01 entity=product
+    Q: Thuốc BVTV Cocosieu 15.5WP có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['chemical:jingangmycin', 'chemical:triadimefon']
+    tags_v2: product:cocosieu-15-5-wp|chemical:triadimefon|chemical:jingangmycin|disease:rust|disease:powdery-mildew|disease:blast|disease:nhom-a|disease:nhom-b
+
+#10 idx=493 sim=0.4205 tag_score=2 id=IC-TOP entity=product
+    Q: IC-TOP 28.1SC BOÓCDOR
+    reason: PASS: no must, matched any_tags=['chemical:copper', 'chemical:lime']
+    tags_v2: product:ic-top-28-1sc-boocdor|chemical:copper|chemical:lime|pest:bo-phan|pest:ray-mem|crop:rau|brand:bmc|pest:nut-than
+
+#11 idx=514 sim=0.4164 tag_score=2 id=Cocosieu entity=product
+    Q: Cocosieu 15.5WP
+    reason: PASS: no must, matched any_tags=['chemical:jingangmycin', 'chemical:triadimefon']
+    tags_v2: product:cocosieu-15-5wp|chemical:triadimefon|chemical:jingangmycin|disease:powdery-mildew|brand:agrishop
+
+#12 idx=495 sim=0.3994 tag_score=2 id=Mi_Stop entity=product
+    Q: Mi Stop 350SC
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole']
+    tags_v2: product:mi-stop-350sc|chemical:azoxystrobin|chemical:difenoconazole|crop:peach|brand:bmc|brand:phuc-thinh
+
+#13 idx=490 sim=0.3845 tag_score=2 id=Shonam entity=product
+    Q: Shonam 500SC
+    reason: PASS: no must, matched any_tags=['chemical:fluazinam', 'chemical:special-additives']
+    tags_v2: product:shonam-500sc|chemical:fluazinam|chemical:special-additives|crop:lua|brand:delta
+
+#14 idx=149 sim=0.3697 tag_score=2 id=pim_pim_75wp_baemsing_chunk_01 entity=product
+    Q: Thuốc Pim.pim 75WP (Baemsing) (Baemsing) là gì và có công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:tricyclazole', 'disease:dao-on']
+    tags_v2: product:pim-pim-75wp|chemical:tricyclazole|disease:dao-on|disease:dao-on-la|disease:dao-on-co-bong
+
+#15 idx=197 sim=0.3625 tag_score=2 id=gone_super_350ec_til350_chunk_01 entity=product
+    Q: Gone Super 350EC (Til350) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:difenoconazole', 'chemical:tebuconazole']
+    tags_v2: product:gone-super-350ec|chemical:difenoconazole|disease:nhom-a|disease:nhom-b|chemical:probiconazole|chemical:tebuconazole|disease:kho-van|disease:dom-van
+
+#16 idx=501 sim=0.3518 tag_score=2 id=BRETIL_SUPER entity=product
+    Q: BRETIL SUPER 300EC
+    reason: PASS: no must, matched any_tags=['chemical:difenoconazole', 'chemical:propiconazole']
+    tags_v2: product:bretil-super-300ec|chemical:difenoconazole|chemical:propiconazole|disease:fungal-disease|pest:bo-tri|pest:bo-nhay|crop:rau-mau|brand:bmc|brand:phuc-thinh
+
+#17 idx=361 sim=0.3423 tag_score=2 id=scab_fungicide_chunk_03 entity=disease
+    Q: Những thuốc nào thuộc nhóm FRAC 11 được sử dụng để trị bệnh ghẻ?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:pyraclostrobin']
+    tags_v2: chemical:azoxystrobin|chemical:pyraclostrobin|chemical:trifloxystrobin|disease:ghe
+
+#18 idx=371 sim=0.3337 tag_score=2 id=citrus_fungicide_chunk_04 entity=disease
+    Q: Quadris Top (azoxystrobin + difenoconazole) dùng trong phòng trừ bệnh trên cam quýt ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole']
+    tags_v2: chemical:azoxystrobin|chemical:difenoconazole|chemical:quadris-top|crop:cam-quyt|disease:disease-control
+
+#19 idx=327 sim=0.3293 tag_score=2 id=citrus_sweet_scab_chunk_04 entity=disease
+    Q: Bệnh ghẻ cam ngọt được phòng trừ bằng thuốc gì?
+    reason: PASS: no must, matched any_tags=['chemical:azoxystrobin', 'chemical:difenoconazole']
+    tags_v2: disease:benh-ghe-cam-ngot|chemical:azoxystrobin|chemical:difenoconazole
+
+#20 idx=210 sim=0.3265 tag_score=2 id=bretil_super_300ec_chunk_01 entity=product
+    Q: Bretil Super 300EC là thuốc bảo vệ thực vật có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['chemical:difenoconazole', 'chemical:propiconazole']
+    tags_v2: product:bretil-super-300ec|chemical:difenoconazole|chemical:propiconazole|disease:dry-leaf-blight|disease:grain-discoloration|disease:leaf-spot|disease:nhom-a|disease:nhom-b
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Tất cả sản phẩm trị nhện. ===
+
+#01 idx=293 sim=0.5108 tag_score=0 id=sau_hai_05_nhen_36__000204 entity=product
+    Q: Xử lý Nhện  kháng cao; nhiều nhện   như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: action:pest-control|pest:nhen|formula:cong-thuc-nhen-khang-cao|chemical:abamectin|product:abinsec-sieu-diet-nhen
+
+#02 idx=471 sim=0.4972 tag_score=0 id=Buti entity=product
+    Q: Buti 43SC Anh Hùng Nhện
+    reason: PASS: no must/any provided
+    tags_v2: product:Buti-43sc-anh-hung-nhen|chemical:bifenazate|pest:nhen|pest:white-spider-mite|brand:delta
+
+#03 idx=86 sim=0.4848 tag_score=0 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#04 idx=472 sim=0.4724 tag_score=0 id=sieu_diet_nhen entity=product
+    Q: Siêu Diệt Nhện
+    reason: PASS: no must/any provided
+    tags_v2: product:sieu-diet-nhen|chemical:abamectin|pest:nhen|pest:nhen|crop:rau|crop:cay-an-qua|brand:bmc|brand:phuc-thinh
+
+#05 idx=191 sim=0.4677 tag_score=0 id=abinsec_1_8ec_tr_m_nh_n_chunk_01 entity=product
+    Q: Sản phẩm Abinsec 1.8EC là thuốc gì và có công dụng ra sao?
+    reason: PASS: no must/any provided
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:nhen|pest:white-spider-mite|crop:cam|mechanisms:tiep-xuc
+
+#06 idx=292 sim=0.4661 tag_score=0 id=sau_hai_05_nhen_35__000203 entity=product
+    Q: Xử lý Nhện ít; mật độ thấp; vùng nhện ít khi mật độ bình thường như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|action:apply-chemical|object:acaricide|pest:nhen|formula:cong-thuc-nhen|chemical:abamectin
+
+#07 idx=500 sim=0.4656 tag_score=0 id=GONE_SUPER entity=product
+    Q: GONE SUPER 350EC, TEEN SUPER 350EC
+    reason: PASS: no must/any provided
+    tags_v2: product:gone-super|product:gone-super-350ec|product:teen-super-350ec|chemical:difenoconazole|chemical:propiconazole|chemical:tebuconazole|pest:dom-den|pest:ri-sat|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#08 idx=467 sim=0.4591 tag_score=0 id=LAMA entity=product
+    Q: LAMA 50EC
+    reason: PASS: no must/any provided
+    tags_v2: product:lama-50ec|chemical:hexythiazox|pest:nhen|pest:white-mite|crop:rau|crop:hoa|brand:bmc
+
+#09 idx=512 sim=0.4582 tag_score=0 id=Xiexie entity=product
+    Q: Xiexie 200WP ANH HÙNG KHUẨN
+    reason: PASS: no must/any provided
+    tags_v2: product:xiexie-200wp-anh-hung-khuan|chemical:bismerthiazol|pest:bacterial-diseases|disease:bacterial-blight|disease:bacterial-spot|crop:lua|brand:agrishop
+
+#10 idx=473 sim=0.4561 tag_score=0 id=nhen_kim_cuong entity=product
+    Q: Nhện Kim Cương
+    reason: PASS: no must/any provided
+    tags_v2: product:nhen-kim-cuong|chemical:deltamethrin|pest:nhen
+
+#11 idx=272 sim=0.4540 tag_score=0 id=sau_hai_05_tri_15__000185 entity=product
+    Q: Xử lý Trĩ - Rất hay kháng thuốc  như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pesticide-application|pest:bo-tri|formula:cong-thuc-bo-tri|product:zigen-super|product:nofara|mechanisms:tiep-xuc-luu-dan-manh
+
+#12 idx=485 sim=0.4534 tag_score=0 id=Haruko entity=product
+    Q: Haruko 5SC, Zeroanvil
+    reason: PASS: no must/any provided
+    tags_v2: product:hexa|product:haruko-5sc|product:zeroanvil|chemical:hexaconazole|pest:fungal-diseases|pest:benh-nam|brand:bmc|brand:phuc-thinh|brand:agrishop
+
+#13 idx=515 sim=0.4426 tag_score=0 id=NAKANO entity=product
+    Q: NAKANO 50WP
+    reason: PASS: no must/any provided
+    tags_v2: product:nakano-50wp|chemical:dithianon|pest:ghe-seo|pest:suong-mai|pest:than-thu|brand:agrishop
+
+#14 idx=466 sim=0.4409 tag_score=0 id=FORZATE entity=product
+    Q: FORZATE 20EW
+    reason: PASS: no must/any provided
+    tags_v2: product:forzate-20ew|chemical:fosthiazate|pest:root-knot-nematode|crop:ca-phe|disease:nematode-infestation|brand:delta
+
+#15 idx=9 sim=0.4393 tag_score=0 id=quy_trinh_nuoi_trai_sau_rieng_02 entity=procedure
+    Q: Trong giai đoạn trái non đến 6–8 lạng, phun dinh dưỡng cho trái sầu riêng theo những đơn nào?
+    reason: PASS: no must/any provided
+    tags_v2: crop:durian|chemical:amino|chemical:cabona
+
+#16 idx=499 sim=0.4384 tag_score=0 id=SHINAWA entity=product
+    Q: SHINAWA 400EC
+    reason: PASS: no must/any provided
+    tags_v2: product:shinawa-400ec|chemical:flusilazole|disease:lem-lep-hat|disease:phan-trang|brand:agrishop
+
+#17 idx=448 sim=0.4347 tag_score=0 id=BINHFOS_gr entity=product
+    Q: VUA SÂU, VUA RỆP - SÂU - RẦY, ANH HÙNG SÂU, TRÙM SÂU
+    reason: PASS: no must/any provided
+    tags_v2: product:vua-sau|product:vua-rep-sau-ray|product:anh-hung-sau|product:trum-sau|product:binhfos-50ec|chemical:profenofos|pest:nhen|pest:bo-tri|mechanisms:xong-hoi-manh|pest:ray-nau|brand:delta
+
+#18 idx=486 sim=0.4345 tag_score=0 id=HoangANHVIL entity=product
+    Q: HoangANHVIL 50SC
+    reason: PASS: no must/any provided
+    tags_v2: product:hoanganhvil-50sc|chemical:hexaconazole|disease:fungal-infections|crop:lua|brand:bmc|brand:phuc-thinh
+
+#19 idx=496 sim=0.4331 tag_score=0 id=NATICUR entity=product
+    Q: NATICUR
+    reason: PASS: no must/any provided
+    tags_v2: product:naticur|chemical:tebuconazole|chemical:trioxystrobin|disease:lem-lep-hat|brand:delta
+
+#20 idx=259 sim=0.4273 tag_score=0 id=sau_hai_05_ray_lung_trang_02__000172 entity=product
+    Q: Xử lý Rầy nâu; rầy lưng trắng - Rất hay kháng thuốc khi mật độ cao như thế nào?
+    reason: PASS: no must/any provided
+    tags_v2: process:pest-control|mechanisms:luu-dan-manh|object:exami|object:binhfos|pest:ray-nau|pest:ray-lung-trang|formula:cong-thuc-ray-nau|formula:cong-thuc-ray-lung-trang
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+
+=== PICKED 20 in stage STRICT ===
+
+=== norm_query: Danh sách sản phẩm trị nhện kèm thành phần hoạt chất ===
+
+#01 idx=459 sim=0.3896 tag_score=2 id=EXAMI entity=product
+    Q: EXAMI 20WG
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid', 'pest:nhen']
+    tags_v2: product:exami-20wg|chemical:flonicamid|pest:bo-nhay|pest:nhen|crop:cay-an-qua|brand:delta|mechanisms:luu-dan-manh
+
+#02 idx=133 sim=0.3758 tag_score=2 id=khongray_54wp_chunk_01 entity=product
+    Q: Thuốc Khongray 54WP có thành phần và công dụng chính như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:khongray-54wp|chemical:buprofezin|chemical:dinotefuran|pest:aphid|pest:bo-tri|pest:leafhopper|mechanisms:luu-dan-manh
+
+#03 idx=187 sim=0.3626 tag_score=2 id=raynanusa_400wp_si_u_r_y_r_p_thay_th_dino_top_chunk_01 entity=product
+    Q: Sản phẩm Raynanusa 400WP là thuốc bảo vệ thực vật có thành phần và công dụng như thế nào?
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:raynanusa-400wp|chemical:buprofezin|chemical:dinotefuran|pest:aphids|pest:bo-tri|mechanisms:luu-dan-manh
+
+#04 idx=455 sim=0.3321 tag_score=2 id=Suparep entity=product
+    Q: Suparep 400WP
+    reason: PASS: no must, matched any_tags=['chemical:buprofezin', 'chemical:dinotefuran']
+    tags_v2: product:suparep-400wp|chemical:buprofezin|chemical:dinotefuran|pest:ray-nau|crop:lua|brand:bmc|brand:phuc-thinh|mechanisms:luu-dan-manh
+
+#05 idx=471 sim=0.4767 tag_score=1 id=Buti entity=product
+    Q: Buti 43SC Anh Hùng Nhện
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:Buti-43sc-anh-hung-nhen|chemical:bifenazate|pest:nhen|pest:white-spider-mite|brand:delta
+
+#06 idx=293 sim=0.4734 tag_score=1 id=sau_hai_05_nhen_36__000204 entity=product
+    Q: Xử lý Nhện  kháng cao; nhiều nhện   như thế nào?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: action:pest-control|pest:nhen|formula:cong-thuc-nhen-khang-cao|chemical:abamectin|product:abinsec-sieu-diet-nhen
+
+#07 idx=473 sim=0.4611 tag_score=1 id=nhen_kim_cuong entity=product
+    Q: Nhện Kim Cương
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:nhen-kim-cuong|chemical:deltamethrin|pest:nhen
+
+#08 idx=467 sim=0.4497 tag_score=1 id=LAMA entity=product
+    Q: LAMA 50EC
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:lama-50ec|chemical:hexythiazox|pest:nhen|pest:white-mite|crop:rau|crop:hoa|brand:bmc
+
+#09 idx=86 sim=0.4493 tag_score=1 id=buti_43sc_anh_h_ng_nh_n_chunk_01 entity=product
+    Q: Buti 43SC (Anh Hùng Nhện) là thuốc BVTV có thành phần gì và công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:buti-43sc|chemical:bifenazate|pest:nhen|pest:white-spider-mite|crop:rose|mechanisms:dac-tri-nhen
+
+#10 idx=472 sim=0.4356 tag_score=1 id=sieu_diet_nhen entity=product
+    Q: Siêu Diệt Nhện
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:sieu-diet-nhen|chemical:abamectin|pest:nhen|pest:nhen|crop:rau|crop:cay-an-qua|brand:bmc|brand:phuc-thinh
+
+#11 idx=448 sim=0.4188 tag_score=1 id=BINHFOS_gr entity=product
+    Q: VUA SÂU, VUA RỆP - SÂU - RẦY, ANH HÙNG SÂU, TRÙM SÂU
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:vua-sau|product:vua-rep-sau-ray|product:anh-hung-sau|product:trum-sau|product:binhfos-50ec|chemical:profenofos|pest:nhen|pest:bo-tri|mechanisms:xong-hoi-manh|pest:ray-nau|brand:delta
+
+#12 idx=174 sim=0.4175 tag_score=1 id=kyodo_25sc_i_b_ng_kydo_chunk_01 entity=product
+    Q: Sản phẩm Kyodo 25SC có thành phần và công dụng chính là gì?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:kyodo-25sc|chemical:diafenthiuron|pest:bo-tri|pest:nhen|pest:white-spider-mite|mechanisms:tiep-xuc
+
+#13 idx=474 sim=0.4167 tag_score=1 id=diet_nhen_sam_set entity=product
+    Q: Diệt Nhện Sấm Sét
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:diet-nhen-sam-set|chemical:lambda-cyhalothrin|pest:nhen|brand:delta
+
+#14 idx=191 sim=0.4167 tag_score=1 id=abinsec_1_8ec_tr_m_nh_n_chunk_01 entity=product
+    Q: Sản phẩm Abinsec 1.8EC là thuốc gì và có công dụng ra sao?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:abinsec-1-8ec|chemical:abamectin|pest:nhen|pest:white-spider-mite|crop:cam|mechanisms:tiep-xuc
+
+#15 idx=292 sim=0.3949 tag_score=1 id=sau_hai_05_nhen_35__000203 entity=product
+    Q: Xử lý Nhện ít; mật độ thấp; vùng nhện ít khi mật độ bình thường như thế nào?
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: process:pest-control|action:apply-chemical|object:acaricide|pest:nhen|formula:cong-thuc-nhen|chemical:abamectin
+
+#16 idx=460 sim=0.3941 tag_score=1 id=MILLION entity=product
+    Q: MILLION 50WG, TEPENYAKI 50WG
+    reason: PASS: no must, matched any_tags=['chemical:flonicamid']
+    tags_v2: product:million-50wg|chemical:flonicamid|pest:planthopper|pest:whitefly|crop:lua|brand:agrishop|mechanisms:luu-dan-manh
+
+#17 idx=470 sim=0.3923 tag_score=1 id=SETIS entity=product
+    Q: SETIS GIÁO SƯ NHỆN 34SC
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:setis-giao-su-nhen-34sc|chemical:spirodiclofen|pest:nhen|pest:white-spider-mite|brand:delta
+
+#18 idx=462 sim=0.3907 tag_score=1 id=giao_su_sau entity=product
+    Q: GIÁO SƯ SÂU
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:giao-su-sau|chemical:avermectin|chemical:abamectin|pest:leaf-folder|pest:nhen
+
+#19 idx=431 sim=0.3883 tag_score=1 id=em_oil entity=product
+    Q: Em Oil 99ec Spray
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:emoil-99ec-spray|chemical:petroleum-oil|pest:nhen|crop:hoa-mai|brand:agrishop
+
+#20 idx=469 sim=0.3853 tag_score=1 id=KYODO_25SC_50WP entity=product
+    Q: KYODO 25SC, KYODO 50WP
+    reason: PASS: no must, matched any_tags=['pest:nhen']
+    tags_v2: product:kyodo|product:kyodo-25sc|product:kyodo-50wp|chemical:diafenthiuron|pest:nhen|crop:cay-an-qua|crop:rau|brand:bmc|mechanisms:tiep-xuc
+
+=== FINAL PICK STAGE ===
+final_stage : STRICT
+picked_count: 20
+top_k       : 20
+========================
+

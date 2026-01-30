@@ -1,32 +1,35 @@
 import openai
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import sys, json
 import uuid
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from policies.v7_policy import PolicyV7
-from flask import Flask, session, request, jsonify
+from flask import Flask, session, request, jsonify, Response, stream_with_context, render_template
 from werkzeug.utils import secure_filename
 from pathlib import Path
-from flask import render_template
 from run.main import BASE_DIR, KB
 from rag.logging.logger_csv import append_log_to_csv  # Import CSV logging function
 from logger_img_csv.logger_img import log_image_analysis  # Import log_image_analysis function
 from rag.config import RAGConfig
 from rag.kb_loader import load_npz
-from rag.pipeline import answer_with_suggestions
+from rag.pipeline import answer_with_suggestions, answer_with_suggestions_stream
 openai.api_key = '...'
 
 # thêm path để import module rag
-CSV_PATH = "D:/Huy/Project/programing/search-engine/search-engine/rag_logs.csv"
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(os.environ["BMCVN_BASE"])
+
+UPLOAD_FOLDER = BASE_DIR / "uploads"
+CSV_PATH = BASE_DIR / "rag_logs.csv"
+KB_PATH = BASE_DIR / "data-kd-1-4-25-1-2026-focus-product.npz"
 # Cấu hình Flask
 app = Flask(__name__)
 
 app.secret_key = "BmcVN!2023#"
 
 # Thư mục lưu ảnh tải lên
-UPLOAD_FOLDER = BASE_DIR / 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'jfif'}
 # Giới hạn file upload tối đa 16MB (có thể tăng tuỳ nhu cầu)
@@ -212,7 +215,7 @@ def query_rag_system(user_id, kb, API_KEY, query):
     user_query = query
     openai.api_key = API_KEY
     client = openai
-    KB = "D:/Huy/Project/programing/search-engine/search-engine/data-kd-1-4-25-1-2026-focus-product.npz"
+    KB = "D:/bmcvn-dev/data-kd-1-4-25-1-2026-focus-product.npz"
     kb = load_npz(KB)   
     cfg = RAGConfig()
     policy = PolicyV7()
@@ -239,6 +242,31 @@ def process_with_rag( user_id, description):
         return {"error": "Hệ thống RAG không trả về kết quả."}
 
     return result_from_rag
+
+def process_with_rag_stream(user_id, description):
+    if not description:
+        yield "Không có mô tả để xử lý."
+        return
+
+    # y hệt query_rag_system nhưng dùng answer_with_suggestions_stream
+    user_query = description
+    openai.api_key = openai.api_key
+    client = openai
+    KB = "D:/bmcvn-dev/data-kd-1-4-25-1-2026-focus-product.npz"
+    kb = load_npz(KB)
+    cfg = RAGConfig()
+    policy = PolicyV7()
+
+    for chunk in answer_with_suggestions_stream(
+        user_id=user_id,
+        user_query=user_query,
+        kb=kb,
+        client=client,
+        cfg=cfg,
+        policy=policy,
+    ):
+        yield chunk
+
 
 # Ghi log vào CSV cho phân tích ảnh
 def log_image_analysis_result(image_path, image_description):
@@ -352,12 +380,70 @@ def upload_image():          # Xử lý upload ảnh và câu hỏi từ ngườ
 
         return jsonify({"result": result})
 
+@app.route('/upload_stream', methods=['POST'])
+def upload_stream():
+    user_id = get_user_id()
+    user_query = request.form.get('query', '').strip() if 'query' in request.form else ''
+
+    if 'file' not in request.files and not user_query:
+        return Response("Bạn cần nhập nội dung hoặc tải lên hình ảnh.", status=400, mimetype="text/plain; charset=utf-8")
+
+    has_file = 'file' in request.files and request.files['file'].filename != ''
+    image_description = None
+    file_path = None
+
+    # --- xử lý file giống /upload ---
+    if 'file' in request.files:
+        file = request.files['file']
+        if file.filename == '':
+            if not user_query:
+                return Response("Không có file hình ảnh được chọn.", status=400, mimetype="text/plain; charset=utf-8")
+        elif not allowed_file(file.filename):
+            return Response("Định dạng file không hợp lệ. Chỉ chấp nhận png, jpg, jpeg, gif.", status=400, mimetype="text/plain; charset=utf-8")
+        else:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            image_description = analyze_image_with_gpt4v(file_path)
+            log_image_analysis_result(file_path, image_description)
+
+    # --- build query cuối giống /upload ---
+    final_query = None
+    if has_file and user_query:
+        image_base64 = encode_image_to_base64(file_path)
+        diag_json = diagnose_from_image(client=openai, q=user_query, image_base64=image_base64)
+        product_query = build_product_query_from_diag(diag_json)
+        final_query = product_query
+    elif has_file:
+        final_query = image_description
+    else:
+        final_query = user_query
+
+    @stream_with_context
+    def generate():
+        # headers “đẩy stream” nhanh (quan trọng nếu reverse proxy)
+        yield ""  # kickstart
+
+        # stream từ pipeline
+        for chunk in process_with_rag_stream(user_id, final_query):
+            yield chunk
+
+    resp = Response(generate(), mimetype="text/plain; charset=utf-8")
+    resp.headers["Cache-Control"] = "no-cache"
+    resp.headers["X-Accel-Buffering"] = "no"  # nginx: tắt buffer nếu có
+    return resp
+
 @app.route('/')
 def index():
     return render_template('./index.html') 
 
 if __name__ == '__main__':
-    app.run(debug=True) # Chạy Flask ở chế độ debug
+    app.run(
+        host="127.0.0.1",
+        port=5001,
+        debug=True,
+        threaded=True
+    )
     
     
     

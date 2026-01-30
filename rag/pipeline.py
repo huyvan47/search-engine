@@ -19,6 +19,7 @@ from rag.reasoning.multi_hop import multi_hop_controller
 from typing import List, Tuple, Dict, Any
 from rag.logging.debug_log import debug_log
 from rag.post_answer.enricher import enrich_answer_if_needed
+from rag.generator import call_finetune_with_context, call_finetune_with_context_stream
 
 
 FORCE_MUST_TAGS = {
@@ -469,3 +470,141 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         "norm_query": norm_query,
         "context_build": context,
     }
+
+def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, policy):
+    """
+    Streaming version: yield từng chunk text cho frontend.
+    Giữ nguyên pipeline logic chính, chỉ đổi bước generate sang stream.
+    """
+    timer = TimingLog(user_query)
+    turns = conversation_state.get_turns(user_id)
+    effective_query = user_query
+
+    # 1) rewrite (giữ như bản thường)
+    if turns and needs_rewrite(user_query):
+        history_text = format_history(turns)
+        try:
+            rewritten = rewrite_query_with_llm(
+                client=client,
+                user_query=user_query,
+                history_text=history_text,
+            )
+            if rewritten:
+                effective_query = rewritten
+        except Exception as e:
+            print("[QUERY REWRITE ERROR]:", e)
+
+    # 2) route + normalize
+    route = route_query(client, effective_query)
+    timer.start("normalize")
+    norm_query = normalize_query(client, effective_query)
+    norm_lower = norm_query.lower()
+    timer.end("normalize")
+
+    # 3) read memory (giữ như bản thường)
+    timer.start("read_memory and check route")
+    memory_facts = read_memory(client=client, user_id=user_id, query=norm_query)
+    memory_prompt = ""
+    if memory_facts:
+        memory_prompt = "USER MEMORY:\n" + "\n".join(f"- {m['fact']}" for m in memory_facts)
+
+    force_rag = any(k in norm_lower for k in FORMULA_TRIGGERS)
+    if force_rag:
+        route = "RAG"
+    timer.end("read_memory and check route")
+
+    # (tuỳ chọn) stream status cho UI
+    yield "⏳ Đang truy vấn dữ liệu...\n\n"
+
+    # 4) tag filter pipeline (giữ như bản thường)
+    timer.start("tag_filter_pipeline running")
+    result = tag_filter_pipeline(norm_query)
+    must_tags = result.get("must", [])
+    any_tags  = result.get("any", [])
+    timer.end("tag_filter_pipeline running")
+
+    # 5) retrieval
+    is_list = is_listing_query(norm_query)
+    if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}):
+        hits = formula_mode_search(client=client, kb=kb, norm_query=norm_query, must_tags=must_tags)
+    else:
+        hits = multi_hop_controller(
+            client=client,
+            kb=kb,
+            base_query=norm_query,
+            must_tags=must_tags,
+            any_tags=any_tags,
+        )
+
+    print("QUERY      :", norm_query)
+    print("MUST TAGS  :", must_tags)
+    print("ANY TAGS   :", any_tags)
+    debug_log("QUERY      :", norm_query)
+    debug_log("MUST TAGS  :", must_tags)
+    debug_log("ANY TAGS   :", any_tags)
+
+    timer.start("build_context running")
+    for h in hits:
+        h["fused_score"] = fused_score(h)
+        h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
+
+    hits = preserve_search_order(hits)
+    if not hits:
+        yield "Không tìm thấy dữ liệu phù hợp."
+        return
+
+    primary_doc = hits[0]
+
+    # 6) build context
+    base_ctx = choose_adaptive_max_ctx(hits, is_listing=is_list)
+    max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
+
+    policy = decide_answer_policy(effective_query, primary_doc, force_listing=is_list)
+
+    off_filter_tag_on_doc = policy.intent not in {"disease"}  # y hệt logic gốc :contentReference[oaicite:7]{index=7}
+    if not off_filter_tag_on_doc:
+        hits = evidence_gate_by_tags(hits, must_tags=must_tags, any_tags=any_tags)
+
+    context = build_context_from_hits(hits[:max_ctx])
+
+    yield "✍️ Đang tổng hợp câu trả lời...\n\n"
+
+    # 7) generate streaming
+    answer_mode_final = ("listing" if policy.format == "listing" else policy.intent)
+
+    parts = []
+    for tok in call_finetune_with_context_stream(
+        system_prefix=memory_prompt,
+        client=client,
+        user_query=effective_query,
+        context=context,
+        answer_mode=answer_mode_final,
+        rag_mode="STRICT",
+        must_tags=must_tags,
+        any_tags=any_tags,
+    ):
+        parts.append(tok)
+        yield tok
+
+    final_answer = "".join(parts)
+
+    # 8) enrich (⚠️ enrich là 1 call LLM nữa nên sẽ “đứng”; có 2 lựa chọn)
+    # Option A (khuyến nghị cho streaming mượt): bỏ enrich trong stream
+    # Option B: enrich xong rồi append thêm phần "Bổ sung" sau cùng (không stream)
+    # final_answer = enrich_answer_if_needed(...)
+
+    # 9) write memory/log (giữ như bản thường)
+    conversation_state.append(user_id, "user", user_query)
+    conversation_state.append(user_id, "assistant", final_answer)
+    log_event(user_id, "user", user_query)
+    log_event(user_id, "assistant", final_answer)
+
+    try:
+        conv_text = build_conversation_text(user_id)
+        facts_raw = summarize_to_fact(client, conv_text)
+        facts = json.loads(facts_raw)
+        write_memory(client, user_id, facts)
+    except Exception as e:
+        print("[MEMORY WRITE ERROR]:", e)
+
+    timer.finish(RAGConfig.enable_timing_log)

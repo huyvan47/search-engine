@@ -92,42 +92,54 @@ document.getElementById('chatForm').addEventListener('submit', async function(e)
     if (sendBtn) sendBtn.disabled = true;
     if (uploadLabel) uploadLabel.style.pointerEvents = "none";
 
+
+    // helper: tạo bubble bot rỗng để đổ text dần
+    function appendBotPlaceholder() {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", "bot-message");
+        messageDiv.innerHTML = `<p></p>`;
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return messageDiv.querySelector("p");
+    }
+
+    function formatBotStreamTextToHtml(text) {
+        if (!text) return "";
+        // bold dòng "1) 2)" và xuống dòng
+        return text.split(/\r?\n/).map(line => {
+            if (/^\s*\d+\)/.test(line)) return "<b>" + line + "</b>";
+            return line;
+        }).join("<br>");
+    }
+
     try {
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData,
-        });
-        const result = await response.json();
+    const response = await fetch('/upload_stream', {
+        method: 'POST',
+        body: formData,
+    });
+
         loadingText.style.display = "none";
-        let botMsg = result.result;
-        // Nếu là object, chỉ lấy trường trả lời chính (ưu tiên content, answer, text, output...)
-        if (typeof botMsg === 'object' && botMsg !== null) {
-            if (botMsg.content) {
-                botMsg = botMsg.content;
-            } else if (botMsg.answer) {
-                botMsg = botMsg.answer;
-            } else if (botMsg.text) {
-                botMsg = botMsg.text;
-            } else if (botMsg.output) {
-                botMsg = botMsg.output;
-            } else {
-                // Nếu không có trường nào, lấy giá trị đầu tiên dạng string
-                const firstStr = Object.values(botMsg).find(v => typeof v === 'string');
-                botMsg = firstStr || "Không thể xử lý yêu cầu của bạn. Vui lòng thử lại.";
-            }
+
+        if (!response.ok || !response.body) {
+            appendMessage("Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.", "bot");
+            throw new Error("stream not available");
         }
-        // Chỉ in đậm các mục chính như 1), 2), ... ở đầu dòng
-        function formatBotMsg(msg) {
-            if (!msg || typeof msg !== 'string') return msg;
-            return msg.split(/\r?\n/).map(line => {
-                // In đậm nếu là dòng bắt đầu bằng số và dấu ) (ví dụ: 1) 2) ...)
-                if (/^\s*\d+\)/.test(line)) {
-                    return '<b>' + line + '</b>';
-                }
-                return line;
-            }).join('<br>');
+
+        const botP = appendBotPlaceholder();
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let accText = "";
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            accText += chunk;
+
+            botP.innerHTML = formatBotStreamTextToHtml(accText);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
-        appendMessage(formatBotMsg(botMsg) || "Không thể xử lý yêu cầu của bạn. Vui lòng thử lại.", "bot");
     } catch (error) {
         loadingText.style.display = "none";
         appendMessage("Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại.", "bot");
