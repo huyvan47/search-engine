@@ -845,11 +845,11 @@ PRODUCT_ALIASES = {
     "oc-ly-tieu-long-18gr": ["oc ly tieu long 18 gr", "thuoc oc ly tieu long 18 gr", "oc ly tieu long", "ly tieu long 18gr", "thuoc oc", "thuoc tru oc", "thuoc diet oc", "thuoc tri oc"],
     "ohayo-100sc": ["ohayo 100 sc", "thuoc ohayo 100 sc", "ohayo 100sc", "ohayo"],
     "ohayo-240sc": ["ohayo 240 sc", "thuoc ohayo 240 sc", "ohayo 240sc", "ohayo"],
-    "onehope": ["onehope", "thuoc onehope"],
-    "onehope-480sl": ["onehope 480sl" ,"onehope 480 sl", "thuoc onehope 480 sl", "onehope"],
+    "onehope": ["onehope", "thuoc onehope", "one hope"],
+    "onehope-480sl": ["onehope 480sl" ,"onehope 480 sl", "thuoc onehope 480 sl", "onehope", "one hope"],
     "oosaka-700wp": ["oosaka", "oosaka 700 wp", "thuoc oosaka 700 wp"],
-    "oscare-100wp": ["oosaka", "oscare 100 wp", "thuoc oscare 100 wp"],
-    "oscare-600wg": ["oosaka", "oscare 600 wg", "thuoc oscare 600 wg"],
+    "oscare-100wp": ["oosaka", "oscare 100 wp", "thuoc oscare 100 wp", "oscare"],
+    "oscare-600wg": ["oosaka", "oscare 600 wg", "thuoc oscare 600 wg", "oscare"],
     "oxatin": ["oxatin", "thuoc oxatin"],
     "oxine-copper": ["dong oxin", "thuoc dong oxin", "oxine", "copper"],
     "panda-4gr": ["phan panda", "phan panda 4gr", "panda 4gr", "panda-4gr", "panda"],
@@ -1457,8 +1457,6 @@ def tag_filter_pipeline(query: str) -> Dict:
         detected_any.add(f"crop:{c}")
     for p in match_aliases(norm_raw, PEST_ALIASES, normalize_entity):
         detected_any.add(f"pest:{p}")
-    for w in match_aliases(norm_raw, PEST_ALIASES, normalize_entity):
-        detected_any.add(f"weed:{w}")
 
     return {
         "query": query,

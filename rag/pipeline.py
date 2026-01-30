@@ -1,4 +1,5 @@
 import json
+import re
 from rag.config import RAGConfig
 from rag.router import route_query
 from rag.normalize import normalize_query
@@ -49,6 +50,14 @@ FORMULA_TRIGGERS = [
     "hoạt chất lưu dẫn phù hợp",
 ]
 
+def norm(s: str) -> str:
+    if not s:
+        return ""
+    s = s.lower()
+    s = s.replace("-", " ").replace("_", " ")
+    s = re.sub(r"[^\w\s]", " ", s)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
 
 def is_formula_query(query: str, tags: dict) -> bool:
     """
@@ -71,10 +80,6 @@ def is_formula_query(query: str, tags: dict) -> bool:
         return True
 
     return False
-
-
-from rag.config import RAGConfig
-
 
 def formula_mode_search(
     *,
@@ -150,6 +155,54 @@ def formula_mode_search(
     # hard cap an toàn
     return results[:max_ctx]
 
+def strip_tag_ns(s):
+    if not s:
+        return ""
+    out = []
+    for part in s.split("|"):
+        if ":" in part:
+            out.append(part.split(":",1)[1])
+        else:
+            out.append(part)
+    return " ".join(out)
+
+def doc_blob(h):
+    return norm(
+        (h.get("question","") or "") + " " +
+        (h.get("answer","") or "") + " " +
+        " ".join(h.get("alt_questions",[]) or []) + " " +
+        strip_tag_ns(h.get("tags_v2",""))
+    )
+
+def strip_ns(t):
+    if ":" in t:
+        t = t.split(":",1)[1]
+    return t
+
+def evidence_gate_by_tags(hits, must_tags, any_tags, keep_top=20):
+    must_tags = [norm(strip_ns(t)) for t in must_tags]
+    any_tags  = [norm(strip_ns(t)) for t in any_tags]
+
+    kept = []
+
+    for h in hits:
+        blob = norm(
+            (h.get("question","") or "") + " " +
+            (h.get("answer","") or "") + " " +
+            " ".join(h.get("alt_question",[]) or []) + " " +
+            strip_tag_ns(h.get("tags_v2",""))
+        )
+
+        must_hit = sum(1 for t in must_tags if t in blob)
+        any_hit  = sum(1 for t in any_tags  if t in blob)
+
+        if must_hit >= 1 or any_hit >= 1:
+            kept.append((must_hit, any_hit, h))
+
+    kept.sort(key=lambda x: (x[0], x[1]), reverse=True)
+
+    return [h for _,_,h in kept[:RAGConfig.max_ctx_soft]]
+
 def preserve_search_order(hits):
     """
     Đánh dấu thứ tự gốc từ search() để pipeline KHÔNG làm xáo trộn.
@@ -199,6 +252,7 @@ QUY TẮC TRẢ LỜI:
 """.strip()
 
 def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
+    off_filter_tag_on_doc = True
     timer = TimingLog(user_query)
 
     # =====================================================
@@ -296,6 +350,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     # =====================================================
     if is_formula_query(norm_query, result):
         timer.start("is_formula_query running")
+        print("is_formula_query running")
         hits = formula_mode_search(
             client=client,
             kb=kb,
@@ -305,6 +360,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         timer.end("is_formula_query running")
     else:
         timer.start("multi_hop_controller running")
+        print("multi_hop_controller running")
         hits = multi_hop_controller(
             client=client,
             kb=kb,
@@ -322,6 +378,10 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     debug_log("ANY TAGS   :", any_tags)
 
     timer.start("build_context running")
+    for h in hits:
+        h["fused_score"] = fused_score(h)
+        h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
+
     hits = preserve_search_order(hits)
 
     if not hits:
@@ -332,10 +392,6 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
             "norm_query": norm_query,
         }
 
-    # for h in hits:
-    #     h["fused_score"] = fused_score(h)
-    #     h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
-
     primary_doc = hits[0]
 
     # =====================================================
@@ -344,13 +400,24 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
     base_ctx = choose_adaptive_max_ctx(hits, is_listing=is_list)
     max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
 
+    policy = decide_answer_policy(
+        effective_query, primary_doc, force_listing=is_list
+    )
+
+    off_filter_tag_on_doc = policy.intent not in {"disease"}
+
+    if not off_filter_tag_on_doc:
+        hits = evidence_gate_by_tags(
+            hits,
+            must_tags=must_tags,
+            any_tags=any_tags,
+        )
+
     context = build_context_from_hits(hits[:max_ctx])
     timer.end("build_context running")
 
     timer.start("call_finetune_with_context running")
-    policy = decide_answer_policy(
-        effective_query, primary_doc, force_listing=is_list
-    )
+
     answer_mode_final = (
         "listing" if policy.format == "listing" else policy.intent
     )
@@ -363,7 +430,9 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         answer_mode=answer_mode_final,
         rag_mode="STRICT",
     )
+    timer.end("call_finetune_with_context running")
 
+    timer.start("enrich_answer_if_needed running")
     final_answer = enrich_answer_if_needed(
         client=client,
         user_query=effective_query,
@@ -373,7 +442,7 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         must_tags=must_tags,
         route="RAG",
     )
-    timer.end("call_finetune_with_context running")
+    timer.end("enrich_answer_if_needed running")
     # =====================================================
     # SHORT-TERM + LONG-TERM MEMORY WRITE
     # =====================================================
