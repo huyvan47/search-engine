@@ -15,7 +15,7 @@ from rag.logging.logger_csv import append_log_to_csv  # Import CSV logging funct
 from logger_img_csv.logger_img import log_image_analysis  # Import log_image_analysis function
 from rag.config import RAGConfig
 from rag.kb_loader import load_npz
-from rag.pipeline import answer_with_suggestions, answer_with_suggestions_stream
+from rag.pipeline import answer_with_suggestions_stream
 openai.api_key = '...'
 
 # thêm path để import module rag
@@ -25,9 +25,6 @@ UPLOAD_FOLDER = BASE_DIR / "uploads"
 CSV_PATH = BASE_DIR / "rag_logs.csv"
 KB_PATH = BASE_DIR / "data-kd-1-4-25-1-2026-focus-product.npz"
 
-print("CSV_PATH =", CSV_PATH)
-print("CSV exists =", CSV_PATH.exists())
-print("CSV parent exists =", CSV_PATH.parent.exists())
 # Cấu hình Flask
 app = Flask(__name__)
 
@@ -209,43 +206,6 @@ def diagnose_from_image(client, q: str, image_base64: str) -> dict:
     text = response.choices[0].message.content.strip()
     return json.loads(text)
 
- # Gọi hệ thống RAG để trả lời câu hỏi dựa trên mô tả hình ảnh
-def query_rag_system(user_id, kb, API_KEY, query): 
-    """
-    Gọi vào hệ thống RAG thực tế để trả lời câu hỏi dựa trên mô tả hình ảnh.
-    Hệ thống RAG có thể truy vấn cơ sở dữ liệu hoặc sử dụng các mô hình tạo câu trả lời.
-    """
-    # Tích hợp openai.OpenAI với hệ thống RAG thực tế
-    user_query = query
-    openai.api_key = API_KEY
-    client = openai
-    kb = load_npz(KB_PATH)   
-    cfg = RAGConfig()
-    policy = PolicyV7()
-    answer = answer_with_suggestions(
-        user_id=user_id,
-        user_query=user_query,
-        kb=kb,
-        client=client,
-        cfg=cfg,
-        policy=policy,
-        )
-    return answer # Trả về kết quả từ hệ thống RAG
-
-
-# Gửi kết quả phân tích vào RAG để trả lời
-def process_with_rag( user_id, description):
-    if not description:
-        return {"error": "Không có mô tả để xử lý."}
-
-    result_from_rag = query_rag_system(user_id, KB_PATH, openai.api_key, description)
-
-    # Bảo vệ nếu RAG trả về None
-    if result_from_rag is None:
-        return {"error": "Hệ thống RAG không trả về kết quả."}
-
-    return result_from_rag
-
 def process_with_rag_stream(user_id, description):
     if not description:
         yield "Không có mô tả để xử lý."
@@ -295,94 +255,6 @@ def encode_image_to_base64(image_path):
     with open(image_path, 'rb') as image_file:
         image_data = image_file.read()
     return base64.b64encode(image_data).decode("utf-8")
-
-@app.route('/upload', methods=['POST'])
-def upload_image():          # Xử lý upload ảnh và câu hỏi từ người dùng
-    user_id = get_user_id()
-    result = None
-    user_query = request.form.get('query', '').strip() if 'query' in request.form else ''
-    print("[DEBUG] request.files:", request.files)
-    print("[DEBUG] request.form:", request.form)
-    if 'file' not in request.files and not user_query:
-        print("[ERROR] No file and no query provided.")
-        return jsonify({"error": "Bạn cần nhập nội dung hoặc tải lên hình ảnh."}), 400 # Kiểm tra nếu không có file và không có câu hỏi
-    has_file = 'file' in request.files and request.files['file'].filename != ''
-    image_description = None
-    file_path = None
-    if 'file' in request.files:
-        file = request.files['file']
-        if file.filename == '':
-            print("[ERROR] No file selected.")
-            if not user_query:
-                return jsonify({"error": "Không có file hình ảnh được chọn."}), 400
-        elif not allowed_file(file.filename):
-            print("[ERROR] File type not allowed.")
-            return jsonify({"error": "Định dạng file không hợp lệ. Chỉ chấp nhận png, jpg, jpeg, gif."}), 400
-        else:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            image_description = analyze_image_with_gpt4v(file_path)  # Phân tích ảnh với GPT-4 Vision
-            log_image_analysis_result(file_path, image_description)  # Ghi log mô tả ảnh vào CSV
-        if has_file and user_query:
-            # Encode ảnh sang base64
-            image_base64 = encode_image_to_base64(file_path)
-
-            # Gọi luồng chẩn đoán chuyên biệt khi có cả text + ảnh
-            diag_json = diagnose_from_image(
-                client=openai,
-                q=user_query,
-                image_base64=image_base64
-            )
-
-            product_query = build_product_query_from_diag(diag_json)
-
-            print("[DEBUG] Product Query:", product_query)
-
-            result = process_with_rag(user_id, product_query)
-
-    elif has_file:
-        result = process_with_rag(user_id, image_description)
-    elif user_query:
-        result = process_with_rag(user_id, user_query)
-    else:
-        return jsonify({"error": "Bạn cần nhập nội dung hoặc tải lên hình ảnh."}), 400
-    try:
-        if not result:
-            result = {}
-
-        if isinstance(result, dict):
-            profile = result.get('profile', {})
-            norm_query = result.get('norm_query', "")
-            strategy = result.get('strategy', "")
-            route = result.get('route', "RAG")
-            context_build = result.get('context_build', "")
-        else:
-            profile = {}
-            norm_query = ""
-            strategy = ""
-            route = "RAG"
-        context_build = ""
-        # Lấy context_build nếu có, nếu không thì truyền rỗng
-        context_build = result.get('context_build', "") if isinstance(result, dict) else ""
-        append_log_to_csv( # Ghi log kết quả RAG vào CSV
-            str(CSV_PATH),
-            user_query if user_query else (image_description if image_description else ""),
-            norm_query,
-            context_build,
-            strategy,
-            profile,
-            result,
-            route,
-        )
-        return jsonify({"result": result})
-    except Exception as e:
-        print(f"[LOG CSV ERROR]: {e}")
-
-        if result is None:
-            result = "Không thể xử lý yêu cầu do lỗi hệ thống."
-
-        return jsonify({"result": result})
 
 @app.route('/upload_stream', methods=['POST'])
 def upload_stream():

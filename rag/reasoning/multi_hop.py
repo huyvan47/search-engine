@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple, Any
 from rag.config import RAGConfig
 from rag.logging.multi_hop_logger import write_multi_hop_logs
 from rag.retriever import search as retrieve_search
+from rag.tag_filter import tag_filter_pipeline
 
 
 # -----------------------------
@@ -154,6 +155,396 @@ def _dedupe_hits(hits: List[dict], seen_ids: set) -> List[dict]:
 def _get_cfg(name: str, default):
     return getattr(RAGConfig, name, default)
 
+def safe_json_array(text):
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return [str(x).strip() for x in data if str(x).strip()]
+    except Exception:
+        pass
+
+    # fallback: extract quoted strings
+    import re
+    return re.findall(r'"([^"]+)"', text)
+
+def infer_pest_from_problem(client, base_query: str) -> List[str]:
+    """
+    Infer likely pests/insects/mites/nematodes from user's problem.
+    Output MUST be Vietnamese pest names.
+    """
+    prompt = f"""
+You are an expert in agricultural pests (insects, mites, nematodes).
+
+User query:
+"{base_query}"
+
+Task:
+Infer the most likely pests the user is referring to OR the most common pests relevant to this situation.
+Return pest names in VIETNAMESE that Vietnamese agronomists/farmers commonly use.
+
+Rules:
+- Only pest names (no products, no treatments)
+- Include insects/mites if relevant; include nematodes only if strongly relevant
+- 3–8 items
+- Prefer specific pests over generic terms
+- Output MUST be a JSON array in Vietnamese
+- No explanations
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+    arr = safe_json_array(resp.choices[0].message.content)
+
+    # light normalize (optional)
+    out = []
+    for x in arr:
+        s = str(x).strip()
+        if not s:
+            continue
+        # avoid super generic junk
+        if s.lower() in {"côn trùng", "sâu hại", "bọ", "sâu"}:
+            continue
+        out.append(s)
+
+    # de-dup keep order
+    seen = set()
+    final = []
+    for s in out:
+        k = s.lower()
+        if k in seen:
+            continue
+        seen.add(k)
+        final.append(s)
+
+    return final[:8]
+
+def infer_mechanism_from_pest(client, base_query: str) -> List[str]:
+    """
+    Infer control mechanisms for pest problems.
+    Output MUST be Vietnamese mechanism phrases usable as search queries.
+    """
+    prompt = f"""
+You are an expert in pest control mechanisms for agriculture.
+
+User query:
+"{base_query}"
+
+Task:
+List mechanisms / mode-of-action styles typically used to control the likely pests in this query.
+
+Return Vietnamese phrases that can be used as search queries, for example:
+- "tác động tiếp xúc"
+- "tác động vị độc"
+- "nội hấp lưu dẫn"
+- "xông hơi"
+- "ức chế sinh trưởng côn trùng (IGR)"
+- "tác động thần kinh côn trùng"
+- "diệt trứng và ấu trùng"
+- "trừ bọ trĩ nội hấp"
+- "trừ rệp sáp tiếp xúc"
+
+Rules:
+- 4–8 items
+- No product names, no active ingredient names
+- Output MUST be a JSON array in Vietnamese
+- No explanations
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+    arr = safe_json_array(resp.choices[0].message.content)
+
+    # sanitize + de-dup
+    cleaned = []
+    for x in arr:
+        s = str(x).strip()
+        if not s:
+            continue
+        # avoid overly generic
+        if s.lower() in {"cơ chế", "biện pháp", "phòng trừ"}:
+            continue
+        cleaned.append(s)
+
+    seen = set()
+    final = []
+    for s in cleaned:
+        k = s.lower()
+        if k in seen:
+            continue
+        seen.add(k)
+        final.append(s)
+
+    return final[:8]
+
+def infer_disease_from_symptom(client, base_query: str) -> List[str]:
+    prompt = f"""
+You are a plant pathologist.
+
+User described this crop problem:
+"{base_query}"
+
+Infer the most likely plant diseases or pathogens.
+Return the names in VIETNAMESE that a Vietnamese agronomist would use.
+
+Rules:
+- Only disease or pathogen names (no products)
+- 3–6 items
+- No explanations
+- Return JSON array in Vietnamese
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+    return safe_json_array(resp.choices[0].message.content)
+
+def infer_mechanism_from_disease(client, base_query: str) -> List[str]:
+    prompt = f"""
+You are a plant pathology expert.
+
+Given this crop problem:
+"{base_query}"
+
+List the biological or chemical control mechanisms usually involved in treating it.
+
+Examples:
+- "fungal cell wall synthesis"
+- "oomycete inhibition"
+- "insect nervous system"
+- "viral replication"
+- "systemic acquired resistance"
+
+Rules:
+- 3–6 mechanisms
+- Do NOT mention any product names
+- Return JSON array only
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+
+    return safe_json_array(resp.choices[0].message.content)
+
+def infer_formula_queries(client, base_query: str) -> List[str]:
+    prompt = f"""
+You are designing crop treatment strategies.
+
+User problem:
+"{base_query}"
+
+Generate high-level treatment formula concepts that would be used.
+Use format like:
+- "fungicide + insecticide"
+- "systemic + contact"
+- "oomycete control + root protection"
+- "stress recovery + disease control"
+
+Rules:
+- 3–6 items
+- Do NOT include product names
+- Return JSON array only
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3,
+    )
+
+    return safe_json_array(resp.choices[0].message.content)
+
+def expand_query_with_llm(client, base_query: str) -> List[str]:
+    prompt = f"""
+Rewrite this crop-related question into multiple alternative search queries:
+
+"{base_query}"
+
+Include:
+- scientific terms
+- agronomy style phrasing
+- common farmer phrasing
+
+Rules:
+- 4–8 variants
+- Do not change meaning
+- No explanations
+- Return JSON array only
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+    )
+
+    return safe_json_array(resp.choices[0].message.content)
+
+def infer_product_intent_queries(client, base_query: str) -> List[str]:
+    prompt = f"""
+User said:
+"{base_query}"
+
+Generate search queries that a person would use when looking for agricultural products to solve this.
+
+Examples:
+- "thuốc trị thối rễ lúa"
+- "fungicide for downy mildew"
+- "systemic insecticide for aphids"
+
+Rules:
+- 3–6 queries
+- No brand names unless user already mentioned one
+- Return JSON array only
+"""
+    resp = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+    )
+
+    return safe_json_array(resp.choices[0].message.content)
+
+def decide_recovery_branch(any_tags):
+    if any(t.startswith("pest:") for t in any_tags):
+        return "pest"
+    if any(t.startswith("disease:") for t in any_tags):
+        return "disease"
+    if any(t.startswith("weed:") for t in any_tags):
+        return "weed"
+    return "unknown"
+
+def no_hit_recovery_pipeline(
+    *,
+    client,
+    kb,
+    base_query: str,
+    any_tags: List[str],
+    top_k: int,
+    max_docs: int = 32,
+):
+    """
+    Evidence-based recovery when hop1 returns no hits.
+    Run all recovery strategies in parallel and let evidence compete.
+    """
+
+    all_hits = []
+    seen_ids = set()
+    branch = decide_recovery_branch(any_tags)
+    # ========= 1. Sinh recovery hypotheses =========
+    if branch == "pest":
+        recovery_queries = {
+            "pest": infer_pest_from_problem(client, base_query),
+            "mechanism": infer_mechanism_from_pest(client, base_query),
+            "formula": infer_formula_queries(client, base_query),
+            "expand": expand_query_with_llm(client, base_query),
+        }
+
+    elif branch == "disease":
+        recovery_queries = {
+            "disease": infer_disease_from_symptom(client, base_query),
+            "mechanism": infer_mechanism_from_disease(client, base_query),
+            "formula": infer_formula_queries(client, base_query),
+            "expand": expand_query_with_llm(client, base_query),
+        }
+
+    else:
+        recovery_queries = {
+            "expand": expand_query_with_llm(client, base_query),
+            "formula": infer_formula_queries(client, base_query),
+        }
+
+    # ========= 2. Thu thập bằng chứng song song =========
+    for mode, queries in recovery_queries.items():
+        print(f" - {mode}:")
+        for q in queries:
+            print("    •", q)
+            tag_result = tag_filter_pipeline(q)
+            print("  tags:", tag_result)
+            must = tag_result.get("must", [])
+            any_  = tag_result.get("any", [])
+            # 🚫 Reject ungrounded queries (no ontology anchor)
+            if not must and not any_:
+                print("  ⚠ SKIP (no tags) →", q)
+                continue
+            # FORMULA: dùng tag sinh ra, không dùng any_tags gốc
+            if mode == "formula":
+                any_ = any_
+
+            hits = retrieve_search(
+                client=client,
+                kb=kb,
+                norm_query=q,
+                top_k=top_k,
+                must_tags=must,
+                any_tags=any_,
+            )
+            print(f"  hits={len(hits)}")
+
+            for h in hits:
+                print(f"    + ADD doc {h.get('id')} score={h.get('score'):.4f}")
+                doc_id = h.get("id")
+                if doc_id in seen_ids:
+                    continue
+                seen_ids.add(doc_id)
+
+                h["recovery_mode"] = mode
+                h["origin_query"] = q
+                all_hits.append(h)
+
+    print("\n[TOTAL RECOVERED DOCS]", len(all_hits))
+    from collections import Counter
+    print("By mode:", Counter(h["recovery_mode"] for h in all_hits))
+
+    if not all_hits:
+        return []
+
+    # ========= 3. Gán điểm để chọn top 32 =========
+
+    def score_doc(h):
+        sim = float(h.get("score", 0))
+        tag_count = len(str(h.get("tags_v2", "")).split(","))
+
+        mode_weight = {
+            "disease": 1.0,
+            "formula": 0.9,
+            "mechanism": 0.7,
+            "expand": 0.6,
+        }.get(h.get("recovery_mode"), 0.5)
+
+        return 0.6 * sim + 0.3 * tag_count + 0.1 * mode_weight
+
+    # ========= 4. Bảo vệ đa thế thoại =========
+    from collections import defaultdict
+    buckets = defaultdict(list)
+
+    for h in all_hits:
+        buckets[h["recovery_mode"]].append(h)
+    print("\n[BUCKET SIZES]")
+    for mode, docs in buckets.items():
+        print(f"  {mode}: {len(docs)}")
+    final = []
+
+    # mỗi mode tối thiểu 3 doc nếu có
+    for mode, docs in buckets.items():
+        docs_sorted = sorted(docs, key=score_doc, reverse=True)
+        final.extend(docs_sorted[:3])
+
+    # fill phần còn lại theo score toàn cục
+    remaining = [h for h in all_hits if h not in final]
+    remaining_sorted = sorted(remaining, key=score_doc, reverse=True)
+    print("\n[FINAL SELECTED DOCS]", len(final))
+    for h in remaining_sorted:
+        print(f"  {h['recovery_mode']:10} | {h.get('id')} | {h.get('score'):.4f}")
+        if len(final) >= max_docs:
+            break
+        final.append(h)
+    print("=== [NO-HIT RECOVERY END] ===\n")
+    return final
 
 # -----------------------------------------
 # 4) Multi-hop controller (production-grade)
@@ -166,71 +557,86 @@ def multi_hop_controller(
     must_tags: List[str],
     any_tags: List[str],
 ) -> List[dict]:
-    """
-    Multi-hop đúng chuẩn (LLM-in-the-loop) trên hạ tầng hiện có:
-
-    - Hop 1: strict retrieval theo must_tags (query = base_query)
-    - Hop 2..N: LLM quyết định cần hop tiếp và sinh next_query
-        + retrieval relax (ưu tiên any_tags nếu có, nếu không thì free search)
-    - Stop cứng:
-        1) max_hops
-        2) không thêm doc mới (added == 0)
-        3) đạt ngưỡng coverage (min_docs_for_answer)
-        4) LLM nói dừng (need_next_hop = false) / next_query invalid
-        5) lặp query (anti-loop)
-
-    - Giữ logging (hops_data) và timer
-    """
 
     # ---- Config ----
-    top_k = int(_get_cfg("multi_hop_top_k", 20))
-    max_hops = int(_get_cfg("max_multi_hops", 3))  # nên 2~3
-    min_docs = int(_get_cfg("min_docs_for_answer", 25))  # coverage threshold
+    top_k   = int(_get_cfg("multi_hop_top_k", 20))
+    max_hops = int(_get_cfg("max_multi_hops", 3))
+    min_docs = int(_get_cfg("min_docs_for_answer", 25))
     enable_logs = bool(_get_cfg("enable_multi_query_log", True))
 
     must_tags = list(must_tags or [])
-    any_tags = list(any_tags or [])
+    any_tags  = list(any_tags or [])
 
     all_hits: List[dict] = []
     seen_ids = set()
     hops_data: List[dict] = []
     used_queries = set()
 
-    # (Optional) intent hint — chỉ để log/diagnostic, không hard-code tags
     intent_hint = analyze_intent_strategy(client, base_query)
-
-    # =========================
-    # HOP 1: STRICT by must_tags
-    # =========================
     used_queries.add(base_query)
 
-    hits1 = retrieve_search(
-        client=client,
-        kb=kb,
-        norm_query=base_query,
-        top_k=top_k,
-        must_tags=must_tags,
-        any_tags=[],  # strict
-    )
+    # =========================
+    # HOP 1 — Router confidence check
+    # =========================
 
-    unique_hits1 = _dedupe_hits(hits1, seen_ids)
-    all_hits.extend(unique_hits1)
+    hop1_exists = bool(must_tags)
 
-    hop1_record = {
-        "hop": 1,
-        "query": base_query,
-        "num_hits": len(unique_hits1),
-        "hits": unique_hits1,
-        "decision": {
-            "intent_hint": intent_hint,
-            "stop_reason": "",
-        },
-    }
-    hops_data.append(hop1_record)
+    if hop1_exists:
+        hits1 = retrieve_search(
+            client=client,
+            kb=kb,
+            norm_query=base_query,
+            top_k=top_k,
+            must_tags=must_tags,
+            any_tags=[],
+        )
 
-    # stop cứng: hop1 không có gì
+        unique_hits1 = _dedupe_hits(hits1, seen_ids)
+        all_hits.extend(unique_hits1)
+
+        hop1_record = {
+            "hop": 1,
+            "query": base_query,
+            "num_hits": len(unique_hits1),
+            "hits": unique_hits1,
+            "decision": {
+                "intent_hint": intent_hint,
+                "stop_reason": "",
+            },
+        }
+        hops_data.append(hop1_record)
+
+    else:
+        unique_hits1 = []
+        hops_data.append({
+            "hop": 1,
+            "query": base_query,
+            "num_hits": 0,
+            "hits": [],
+            "decision": {
+                "intent_hint": intent_hint,
+                "stop_reason": "no_must_tags_skip_hop1",
+            },
+        })
+
+    # =========================
+    # HOP1 FAILED → Recovery
+    # =========================
     if not unique_hits1:
-        hop1_record["decision"]["stop_reason"] = "no_hits_in_hop1"
+        if hop1_exists:
+            hops_data[-1]["decision"]["stop_reason"] = "no_hits_hop1_recovered"
+
+        recovered_hits = no_hit_recovery_pipeline(
+            client=client,
+            kb=kb,
+            base_query=base_query,
+            any_tags=any_tags,
+            top_k=top_k,
+        )
+
+        recovered_unique = _dedupe_hits(recovered_hits, seen_ids)
+        all_hits.extend(recovered_unique)
+
         if enable_logs:
             write_multi_hop_logs(
                 original_query=base_query,
@@ -239,9 +645,11 @@ def multi_hop_controller(
             )
         return all_hits
 
-    # stop cứng: đủ coverage ngay
+    # =========================
+    # Enough coverage after Hop1
+    # =========================
     if len(all_hits) >= min_docs:
-        hop1_record["decision"]["stop_reason"] = f"enough_docs_after_hop1>={min_docs}"
+        hops_data[-1]["decision"]["stop_reason"] = f"enough_docs_after_hop1>={min_docs}"
         if enable_logs:
             write_multi_hop_logs(
                 original_query=base_query,
@@ -250,13 +658,13 @@ def multi_hop_controller(
             )
         return all_hits
 
-    # ==========================================
-    # HOP 2..N: LLM decide next_query + relax search
-    # ==========================================
+    # =========================
+    # HOP 2..N
+    # =========================
     current_query = base_query
-    # hop index bắt đầu từ 2
+
     for hop in range(2, max_hops + 1):
-        # 1) LLM decide
+
         need, next_query, llm_reason = analyze_need_next_hop(
             client=client,
             query=current_query,
@@ -282,7 +690,6 @@ def multi_hop_controller(
             })
             break
 
-        # anti-loop: không cho query lặp hoặc quá giống (đơn giản: exact match)
         if next_query in used_queries:
             decision["stop_reason"] = "repeat_query_blocked"
             hops_data.append({
@@ -296,19 +703,13 @@ def multi_hop_controller(
 
         used_queries.add(next_query)
 
-        # 2) SEARCH strategy:
-        #    - ưu tiên any_tags nếu có (relax theo tag)
-        #    - nếu không có any_tags → free search
-        must_local: List[str] = []
-        any_local: List[str] = any_tags if any_tags else []
-
         hits_h = retrieve_search(
             client=client,
             kb=kb,
             norm_query=next_query,
             top_k=top_k,
-            must_tags=must_local,
-            any_tags=any_local,
+            must_tags=[],
+            any_tags=any_tags if any_tags else [],
         )
 
         unique_hits_h = _dedupe_hits(hits_h, seen_ids)
@@ -316,29 +717,25 @@ def multi_hop_controller(
         all_hits.extend(unique_hits_h)
 
         decision["added_new_docs"] = added
-        decision["search_mode"] = "any_tags" if any_local else "free_search"
+        decision["search_mode"] = "any_tags" if any_tags else "free_search"
 
         hops_data.append({
             "hop": hop,
             "query": next_query,
-            "num_hits": len(unique_hits_h),
+            "num_hits": added,
             "hits": unique_hits_h,
             "decision": decision,
         })
 
-        # 3) Stop cứng: không thêm doc mới
         if added == 0:
             decision["stop_reason"] = "no_new_docs_added"
             break
 
-        # 4) Stop cứng: đủ coverage
         if len(all_hits) >= min_docs:
             decision["stop_reason"] = f"enough_docs>={min_docs}"
             break
 
-        # update current query for next iteration
         current_query = next_query
-
 
     if enable_logs:
         write_multi_hop_logs(
