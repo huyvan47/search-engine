@@ -25,9 +25,6 @@ UPLOAD_FOLDER = BASE_DIR / "uploads"
 CSV_PATH = BASE_DIR / "rag_logs.csv"
 KB_PATH = BASE_DIR / "data-kd-1-4-25-1-2026-focus-product.npz"
 
-print("CSV_PATH =", CSV_PATH)
-print("CSV exists =", CSV_PATH.exists())
-print("CSV parent exists =", CSV_PATH.parent.exists())
 # Cấu hình Flask
 app = Flask(__name__)
 
@@ -219,7 +216,7 @@ def query_rag_system(user_id, kb, API_KEY, query):
     user_query = query
     openai.api_key = API_KEY
     client = openai
-    kb = load_npz(KB_PATH)   
+    kb = load_npz(kb)   
     cfg = RAGConfig()
     policy = PolicyV7()
     answer = answer_with_suggestions(

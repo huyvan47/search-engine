@@ -417,8 +417,8 @@ def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
         )
 
     context = build_context_from_hits(hits[:max_ctx])
-    yield f"\n[[CONTEXT_START]]\n{context}\n[[CONTEXT_END]]\n"
     timer.end("build_context running")
+    yield f"\n[[CONTEXT_START]]\n{context}\n[[CONTEXT_END]]\n"
 
     timer.start("call_finetune_with_context running")
 
@@ -499,6 +499,43 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     # 2) route + normalize
     route = route_query(client, effective_query)
+    if route == "GLOBAL":
+        model = "gpt-4.1"
+
+        yield "🌍 Đang trả lời bằng tri thức tổng quát...\n\n"
+
+        resp = client.chat.completions.create(
+            model=model,
+            temperature=0.25,
+            messages=[
+                {"role": "system", "content": _global_system_prompt()},
+                {"role": "user", "content": effective_query},
+            ],
+            stream=True,
+        )
+
+        parts = []
+        for chunk in resp:
+            try:
+                delta = chunk.choices[0].delta
+                if delta and getattr(delta, "content", None):
+                    parts.append(delta.content)
+                    yield delta.content
+            except Exception:
+                continue
+
+        final_text = "".join(parts)
+
+        # memory + log y như non-stream
+        conversation_state.append(user_id, "user", user_query)
+        conversation_state.append(user_id, "assistant", final_text)
+
+        log_event(user_id, "user", user_query)
+        log_event(user_id, "assistant", final_text)
+
+        timer.finish(RAGConfig.enable_timing_log)
+
+        return
     timer.start("normalize")
     norm_query = normalize_query(client, effective_query)
     norm_lower = norm_query.lower()
@@ -574,7 +611,9 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     # 7) generate streaming
     answer_mode_final = ("listing" if policy.format == "listing" else policy.intent)
-
+    timer.start("ttft")
+    timer.start("gpt_stream_total") 
+    first_tok = True
     parts = []
     for tok in call_finetune_with_context_stream(
         system_prefix=memory_prompt,
@@ -586,9 +625,12 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         must_tags=must_tags,
         any_tags=any_tags,
     ):
+        if first_tok:
+            timer.end("ttft")
+            first_tok = False
         parts.append(tok)
         yield tok
-
+    timer.end("gpt_stream_total")
     final_answer = "".join(parts)
 
     try:

@@ -3,6 +3,8 @@
 *.csv
 *.json
 *.exe
+*.code-workspace
+debug_flow.log
 !chemical_tags_from_kb.json
 
 # =========================
