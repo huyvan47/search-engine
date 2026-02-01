@@ -1,5 +1,4 @@
 # Data / model / cache
-*.npz
 *.csv
 *.json
 *.exe

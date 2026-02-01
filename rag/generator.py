@@ -586,7 +586,7 @@ YÊU CẦU TRÌNH BÀY:
 
     # 1) Reuse logic chọn model y như call_finetune_with_context (nếu bạn dùng select_model_for_query)
     # model = select_model_for_query(user_query, answer_mode, any_tags=any_tags)
-    model = "gpt-4.1"
+    model = "gpt-4.1-mini"
 
     # 2) Build prompt giống call_finetune_with_context:
     #    - BASE_REASONING_PROMPT + mode_requirements + system_prefix + context ...

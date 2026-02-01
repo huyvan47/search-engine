@@ -2,6 +2,9 @@ import openai
 import os
 from dotenv import load_dotenv
 load_dotenv()
+from pathlib import Path
+import os
+BASE_DIR = Path(os.environ["BMCVN_BASE"])
 import sys, json
 import uuid
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -23,7 +26,7 @@ BASE_DIR = Path(os.getenv("BMCVN_BASE", Path(__file__).parent.parent))
 
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 CSV_PATH = BASE_DIR / "rag_logs.csv"
-KB_PATH = BASE_DIR / "data-kd-1-4-25-1-2026-focus-product.npz"
+KB_PATH = BASE_DIR / "data-kd-1-4-1-2-2026-focus-product.npz"
 
 # Cấu hình Flask
 app = Flask(__name__)

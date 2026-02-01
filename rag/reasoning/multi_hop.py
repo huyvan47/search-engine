@@ -576,13 +576,15 @@ def multi_hop_controller(
     used_queries.add(base_query)
 
     # =========================
-    # HOP 1 — Router confidence check
+    # HOP 1 — Ontology-driven retrieval
     # =========================
 
-    hop1_exists = bool(must_tags)
+    unique_hits1 = []
+    hop1_stage = "NONE"
 
-    if hop1_exists:
-        hits1 = retrieve_search(
+    # ---- HOP 1A — MUST strict ----
+    if must_tags:
+        hits = retrieve_search(
             client=client,
             kb=kb,
             norm_query=base_query,
@@ -590,41 +592,66 @@ def multi_hop_controller(
             must_tags=must_tags,
             any_tags=[],
         )
+        unique_hits1 = _dedupe_hits(hits, seen_ids)
+        hop1_stage = "MUST"
 
-        unique_hits1 = _dedupe_hits(hits1, seen_ids)
-        all_hits.extend(unique_hits1)
+    # ---- HOP 1B — ANY strict ----
+    if not unique_hits1 and any_tags:
+        hits = retrieve_search(
+            client=client,
+            kb=kb,
+            norm_query=base_query,
+            top_k=top_k,
+            must_tags=[],
+            any_tags=any_tags,
+        )
+        unique_hits1 = _dedupe_hits(hits, seen_ids)
+        hop1_stage = "ANY"
 
-        hop1_record = {
-            "hop": 1,
-            "query": base_query,
-            "num_hits": len(unique_hits1),
-            "hits": unique_hits1,
-            "decision": {
-                "intent_hint": intent_hint,
-                "stop_reason": "",
-            },
-        }
-        hops_data.append(hop1_record)
+    # ---- HOP 1C — TAG-FILTER expansion ----
+    if not unique_hits1:
+        tag_queries = expand_query_with_llm(client, base_query)
+        for q in tag_queries:
+            tag_result = tag_filter_pipeline(q)
+            must = tag_result.get("must", [])
+            any_  = tag_result.get("any", [])
 
-    else:
-        unique_hits1 = []
-        hops_data.append({
-            "hop": 1,
-            "query": base_query,
-            "num_hits": 0,
-            "hits": [],
-            "decision": {
-                "intent_hint": intent_hint,
-                "stop_reason": "no_must_tags_skip_hop1",
-            },
-        })
+            # ontology guard
+            if not must and not any_:
+                continue
+
+            hits = retrieve_search(
+                client=client,
+                kb=kb,
+                norm_query=q,
+                top_k=top_k,
+                must_tags=must,
+                any_tags=any_,
+            )
+            new_hits = _dedupe_hits(hits, seen_ids)
+            if new_hits:
+                unique_hits1.extend(new_hits)
+                hop1_stage = "TAG_FILTER"
+
+    # ---- Record hop1 ----
+    all_hits.extend(unique_hits1)
+    hops_data.append({
+        "hop": 1,
+        "query": base_query,
+        "num_hits": len(unique_hits1),
+        "hits": unique_hits1,
+        "decision": {
+            "intent_hint": intent_hint,
+            "hop1_stage": hop1_stage,
+            "stop_reason": "",
+        },
+    })
 
     # =========================
     # HOP1 FAILED → Recovery
     # =========================
     if not unique_hits1:
-        if hop1_exists:
-            hops_data[-1]["decision"]["stop_reason"] = "no_hits_hop1_recovered"
+        hops_data[-1]["decision"]["stop_reason"] = "no_hits_hop1_recovered"
 
         recovered_hits = no_hit_recovery_pipeline(
             client=client,
