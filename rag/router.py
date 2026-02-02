@@ -99,7 +99,7 @@ def route_query(client, user_query: str) -> str:
         # ---------------------------
         r"\b(nông học|canh tác|thâm canh|luân canh|xen canh)\b",
         r"\b(giống cây|giống trồng|lai f1|variety|cultivar)\b",
-        r"\b(thời vụ|lịch thời vụ|mật độ trồng|khoảng cách trồng|kỹ thuật)\b",
+         r"\b(thời vụ|lịch thời vụ|mật độ trồng|khoảng cách trồng|kỹ thuật)\b",
         r"\b(gieo hạt|ươm cây|cấy|trồng dặm|tỉa cành|tỉa thưa)\b",
         r"\b(tưới nước|thoát nước|úng|hạn|che phủ)\b",
         r"\b(nhà lưới|nhà kính|greenhouse|giá thể|thủy canh|khí canh)\b",

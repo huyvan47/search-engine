@@ -242,14 +242,6 @@ def search(client, kb, norm_query: str, top_k: int, must_tags=None, any_tags=Non
         if len(picked) > before:
             final_stage = "STRICT+FALLBACK1"
 
-    # # Fallback 2: full recall by sim
-    # if len(picked) < top_k:
-    #     picked_fb2 = pick_indices("FALLBACK2_SIM_FULL_RECALL", [], [], top_k)
-    #     before = len(picked)
-    #     picked = merge_fill(picked, picked_fb2, top_k)
-    #     if len(picked) > before:
-    #         final_stage = (final_stage + "+FALLBACK2") if final_stage else "FALLBACK2"
-
     if debug:
         debug_log(
             "=== FINAL PICK STAGE ===",

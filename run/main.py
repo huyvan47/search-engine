@@ -2,7 +2,7 @@ from openai import OpenAI
 from rag.config import RAGConfig
 from rag.kb_loader import load_npz
 from rag.logging.logger_csv import append_log_to_csv
-from rag.pipeline import answer_with_suggestions
+# from rag.pipeline import answer_with_suggestions
 from policies.v7_policy import PolicyV7 as policy
 from pathlib import Path
 from rag.logging.debug_log import debug_log

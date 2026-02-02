@@ -1,3 +1,4 @@
+#Khối import
 import json
 import re
 from rag.config import RAGConfig
@@ -12,17 +13,14 @@ from rag.memory.summarizer import summarize_to_fact
 from rag.conversation_state import conversation_state
 from rag.query_rewriter import needs_rewrite, format_history, rewrite_query_with_llm
 from rag.answer_modes import decide_answer_policy
-from rag.generator import call_finetune_with_context
+from rag.generator import call_finetune_with_context_stream
 from rag.tag_filter import tag_filter_pipeline
 from rag.logging.timing_logger import TimingLog
 from rag.reasoning.multi_hop import multi_hop_controller
 from typing import List, Tuple, Dict, Any
 from rag.logging.debug_log import debug_log
-from rag.post_answer.enricher import enrich_answer_if_needed
-from rag.generator import call_finetune_with_context, call_finetune_with_context_stream
+# from rag.post_answer.enricher import enrich_answer_if_needed
 from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent
 
 FORCE_MUST_TAGS = {
     "mechanisms:luu-dan-manh",
@@ -53,6 +51,7 @@ FORMULA_TRIGGERS = [
     "hoạt chất lưu dẫn phù hợp",
 ]
 
+#chuẩn hóa câu hỏi của người dùng
 def norm(s: str) -> str:
     if not s:
         return ""
@@ -62,10 +61,8 @@ def norm(s: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
+#Nhận diện truy vấn dạng phối công thức
 def is_formula_query(query: str, tags: dict) -> bool:
-    """
-    Nhận diện truy vấn dạng phối công thức.
-    """
 
     has_plus = "+" in query
     has_mechanisms = any(
@@ -84,6 +81,7 @@ def is_formula_query(query: str, tags: dict) -> bool:
 
     return False
 
+#Tìm kiếm theo chế độ công thức (không dùng multi-hop)
 def formula_mode_search(
     *,
     client,
@@ -92,7 +90,6 @@ def formula_mode_search(
     must_tags: List[str],
 ):
     """
-    Tìm kiếm theo chế độ công thức (không dùng multi-hop).
     Budget-aware:
     - Tổng ngân sách = RAGConfig.max_ctx_soft
     - Chia đều cho mỗi must_tag
@@ -158,6 +155,7 @@ def formula_mode_search(
     # hard cap an toàn
     return results[:max_ctx]
 
+#Chuẩn hóa tag
 def strip_tag_ns(s):
     if not s:
         return ""
@@ -169,6 +167,7 @@ def strip_tag_ns(s):
             out.append(part)
     return " ".join(out)
 
+#Phân tách doc để phục vụ  xử lý match key word trong q,a,alt
 def doc_blob(h):
     return norm(
         (h.get("question","") or "") + " " +
@@ -177,12 +176,14 @@ def doc_blob(h):
         strip_tag_ns(h.get("tags_v2",""))
     )
 
+#Chuẩn hóa tag
 def strip_ns(t):
     if ":" in t:
         t = t.split(":",1)[1]
     return t
 
-def evidence_gate_by_tags(hits, must_tags, any_tags, keep_top=20):
+#Filter DOC match tags/keyword
+def evidence_gate_by_tags(hits, must_tags, any_tags):
     must_tags = [norm(strip_ns(t)) for t in must_tags]
     any_tags  = [norm(strip_ns(t)) for t in any_tags]
 
@@ -206,14 +207,13 @@ def evidence_gate_by_tags(hits, must_tags, any_tags, keep_top=20):
 
     return [h for _,_,h in kept[:RAGConfig.max_ctx_soft]]
 
+#Đánh dấu thứ tự gốc từ search() để pipeline KHÔNG làm xáo trộn
 def preserve_search_order(hits):
-    """
-    Đánh dấu thứ tự gốc từ search() để pipeline KHÔNG làm xáo trộn.
-    """
     for idx, h in enumerate(hits):
         h["_search_rank"] = idx
     return hits
 
+#Cộng điểm tag match
 def _count_tag_hits(h, any_tags, must_tags):
     tv2 = str(h.get("tags_v2") or "")
     score = 0
@@ -225,6 +225,7 @@ def _count_tag_hits(h, any_tags, must_tags):
             score += 1
     return score
 
+#Promt phục vụ đi nhánh GLOBAL
 def _global_system_prompt() -> str:
     return """
 Bạn là chuyên gia BVTV/nông học tại Việt Nam. Mục tiêu: cung cấp câu trả lời CHẤT LƯỢNG CAO theo phong cách giáo trình/chuyên khảo,
@@ -254,226 +255,7 @@ QUY TẮC TRẢ LỜI:
 - Văn phong chuyên nghiệp, dễ hiểu; ưu tiên ví dụ và tiêu chí phân biệt hơn là lý thuyết dài dòng.
 """.strip()
 
-def answer_with_suggestions(*, user_id, user_query, kb, client, cfg, policy):
-    off_filter_tag_on_doc = True
-    timer = TimingLog(user_query)
-
-    # =====================================================
-    # PRE-STEP: SHORT-TERM CONTEXT + QUERY REWRITE
-    # =====================================================
-    turns = conversation_state.get_turns(user_id)
-    effective_query = user_query
-
-    if turns and needs_rewrite(user_query):
-        history_text = format_history(turns)
-        try:
-            rewritten = rewrite_query_with_llm(
-                client=client,
-                user_query=user_query,
-                history_text=history_text,
-            )
-            if rewritten:
-                effective_query = rewritten
-        except Exception as e:
-            print("[QUERY REWRITE ERROR]:", e)
-
-    # =====================================================
-    # 0) ROUTER – QUYỀN CAO NHẤT (DÙNG effective_query)
-    # =====================================================
-    route = route_query(client, effective_query)
-    timer.start("normalize")
-    norm_query = normalize_query(client, effective_query)
-    norm_lower = norm_query.lower()
-    timer.end("normalize")
-
-    # =====================================================
-    # MEMORY – READ (LONG-TERM, BEFORE REASONING / HOP0)
-    # =====================================================
-    timer.start("read_memory and check route")
-    memory_facts = read_memory(
-        client=client,
-        user_id=user_id,
-        query=norm_query,
-    )
-
-    memory_prompt = ""
-    if memory_facts:
-        memory_prompt = "USER MEMORY:\n" + "\n".join(
-            f"- {m['fact']}" for m in memory_facts
-        )
-
-    force_rag = any(k in norm_lower for k in FORMULA_TRIGGERS)
-    if force_rag:
-        route = "RAG"
-
-    print("route:", route)
-    timer.end("read_memory and check route")
-
-    # =====================================================
-    # 1) NHÁNH GLOBAL
-    # =====================================================
-    if route == "GLOBAL":
-        model = "gpt-4.1"
-        resp = client.chat.completions.create(
-            model=model,
-            temperature=0.25,
-            max_completion_tokens=3500,
-            messages=[
-                {"role": "system", "content": _global_system_prompt()},
-                {"role": "user", "content": effective_query},
-            ],
-        )
-        text = resp.choices[0].message.content.strip()
-
-        # --- short-term append ---
-        conversation_state.append(user_id, "user", user_query)
-        conversation_state.append(user_id, "assistant", text)
-        return {
-            "text": text,
-            "img_keys": [],
-            "route": "GLOBAL",
-            "norm_query": "",
-            "strategy": f"GLOBAL/{model}",
-            "profile": {"top1": 0, "top2": 0, "gap": 0, "mean5": 0, "n": 0, "conf": 0},
-        }
-
-    # =====================================================
-    # 2) TAG FILTER
-    # =====================================================
-    timer.start("checking listing and tag filter")
-    is_list = is_listing_query(norm_query)
-    result = tag_filter_pipeline(norm_query)
-    timer.end("checking listing and tag filter")
-
-    must_tags = result.get("must", [])
-    any_tags = result.get("any", [])
-
-    # =====================================================
-    # 3) RETRIEVAL
-    # =====================================================
-    if is_formula_query(norm_query, result):
-        timer.start("is_formula_query running")
-        print("is_formula_query running")
-        hits = formula_mode_search(
-            client=client,
-            kb=kb,
-            norm_query=norm_query,
-            must_tags=must_tags,
-        )
-        timer.end("is_formula_query running")
-    else:
-        timer.start("multi_hop_controller running")
-        print("multi_hop_controller running")
-        hits = multi_hop_controller(
-            client=client,
-            kb=kb,
-            base_query=norm_query,
-            must_tags=must_tags,
-            any_tags=any_tags,
-        )
-        timer.end("multi_hop_controller running")
-
-    print("QUERY      :", norm_query)
-    print("MUST TAGS  :", must_tags)
-    print("ANY TAGS   :", any_tags)
-    debug_log("QUERY      :", norm_query)
-    debug_log("MUST TAGS  :", must_tags)
-    debug_log("ANY TAGS   :", any_tags)
-
-    timer.start("build_context running")
-    for h in hits:
-        h["fused_score"] = fused_score(h)
-        h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
-
-    hits = preserve_search_order(hits)
-
-    if not hits:
-        return {
-            "text": "Không tìm thấy dữ liệu phù hợp.",
-            "img_keys": [],
-            "route": "RAG",
-            "norm_query": norm_query,
-        }
-
-    primary_doc = hits[0]
-
-    # =====================================================
-    # 4) BUILD CONTEXT + GENERATE
-    # =====================================================
-    base_ctx = choose_adaptive_max_ctx(hits, is_listing=is_list)
-    max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
-
-    policy = decide_answer_policy(
-        effective_query, primary_doc, force_listing=is_list
-    )
-
-    off_filter_tag_on_doc = policy.intent not in {"disease"}
-
-    if not off_filter_tag_on_doc:
-        hits = evidence_gate_by_tags(
-            hits,
-            must_tags=must_tags,
-            any_tags=any_tags,
-        )
-
-    context = build_context_from_hits(hits[:max_ctx])
-    timer.end("build_context running")
-    yield f"\n[[CONTEXT_START]]\n{context}\n[[CONTEXT_END]]\n"
-
-    timer.start("call_finetune_with_context running")
-
-    answer_mode_final = (
-        "listing" if policy.format == "listing" else policy.intent
-    )
-
-    final_answer = call_finetune_with_context(
-        system_prefix=memory_prompt,
-        client=client,
-        user_query=effective_query,
-        context=context,
-        answer_mode=answer_mode_final,
-        rag_mode="STRICT",
-    )
-    timer.end("call_finetune_with_context running")
-
-    timer.start("enrich_answer_if_needed running")
-    final_answer = enrich_answer_if_needed(
-        client=client,
-        user_query=effective_query,
-        answer_text=final_answer,
-        answer_mode=answer_mode_final,
-        any_tags=any_tags,
-        must_tags=must_tags,
-        route="RAG",
-    )
-    timer.end("enrich_answer_if_needed running")
-    # =====================================================
-    # SHORT-TERM + LONG-TERM MEMORY WRITE
-    # =====================================================
-    conversation_state.append(user_id, "user", user_query)
-    conversation_state.append(user_id, "assistant", final_answer)
-
-    log_event(user_id, "user", user_query)
-    log_event(user_id, "assistant", final_answer)
-
-    try:
-        conv_text = build_conversation_text(user_id)
-        facts_raw = summarize_to_fact(client, conv_text)
-        facts = json.loads(facts_raw)
-        write_memory(client, user_id, facts)
-    except Exception as e:
-        print("[MEMORY WRITE ERROR]:", e)
-
-    timer.finish(RAGConfig.enable_timing_log)
-
-    return {
-        "text": final_answer,
-        "img_keys": extract_img_keys(primary_doc.get("answer", "")),
-        "route": "RAG",
-        "norm_query": norm_query,
-        "context_build": context,
-    }
-
+#Core GPT
 def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, policy):
     """
     Streaming version: yield từng chunk text cho frontend.
@@ -584,14 +366,16 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     debug_log("ANY TAGS   :", any_tags)
 
     timer.start("build_context running")
+
+    if not hits:
+        yield "Không tìm thấy dữ liệu phù hợp."
+        return
+    
     for h in hits:
         h["fused_score"] = fused_score(h)
         h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
 
     hits = preserve_search_order(hits)
-    if not hits:
-        yield "Không tìm thấy dữ liệu phù hợp."
-        return
 
     primary_doc = hits[0]
 
@@ -621,7 +405,6 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         user_query=effective_query,
         context=context,
         answer_mode=answer_mode_final,
-        rag_mode="STRICT",
         must_tags=must_tags,
         any_tags=any_tags,
     ):
