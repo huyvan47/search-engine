@@ -162,6 +162,16 @@ def post_filter_listing_output(model_text: str, user_query: str, any_tags=None) 
 # Main: call finetune/chat with context
 # -----------------------------
 
+def l3_draft_fast(client, user_query, context):
+    return client.chat.completions.create(
+        model="gpt-4.1-mini",
+        temperature=0,
+        messages=[
+            {"role": "system", "content": "Tóm tắt câu trả lời rất ngắn cho mục đích kiểm tra đầy đủ."},
+            {"role": "user", "content": f"Câu hỏi: {user_query}\n\nDữ liệu:\n{context[:3000]}"},
+        ],
+    ).choices[0].message.content
+
 def call_finetune_with_context(client, user_query, context, answer_mode: str = "general", rag_mode: str = "STRICT"):
     print('answer_mode:', answer_mode)
     # Mode requirements (giữ nguyên tinh thần code v4 của anh)

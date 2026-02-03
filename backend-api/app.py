@@ -14,7 +14,6 @@ from flask import Flask, session, request, jsonify, Response, stream_with_contex
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from run.main import BASE_DIR, KB
-from rag.logging.logger_csv import append_log_to_csv  # Import CSV logging function
 from logger_img_csv.logger_img import log_image_analysis  # Import log_image_analysis function
 from rag.config import RAGConfig
 from rag.kb_loader import load_npz
@@ -238,20 +237,6 @@ def process_with_rag_stream(user_id, description):
 # Ghi log vào CSV cho phân tích ảnh
 def log_image_analysis_result(image_path, image_description):
     log_image_analysis(image_path, image_description)  # Ghi mô tả ảnh vào file CSV
-
-# Ghi log vào CSV cho kết quả RAG
-def log_to_csv(image_path, image_description, rag_result, user_query, norm_query, context_build, strategy, profile):
-    append_log_to_csv(
-        'analyze_img_log.csv', 
-        image_path, 
-        image_description, 
-        rag_result, 
-        user_query,
-        norm_query,
-        context_build, # Thêm context_build trường mới
-        strategy,
-        profile
-    )
 
 def encode_image_to_base64(image_path):
     import base64

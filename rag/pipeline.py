@@ -14,7 +14,7 @@ from rag.memory.summarizer import summarize_to_fact
 from rag.conversation_state import conversation_state
 from rag.query_rewriter import needs_rewrite, format_history, rewrite_query_with_llm
 from rag.answer_modes import decide_answer_policy
-from rag.generator import call_finetune_with_context_stream, call_finetune_with_context
+from rag.generator import call_finetune_with_context_stream, call_finetune_with_context, l3_draft_fast
 from rag.tag_filter import tag_filter_pipeline
 from rag.logging.timing_logger import TimingLog
 from rag.logging.debug_log import set_debug_dir
@@ -276,25 +276,18 @@ QUY TẮC TRẢ LỜI:
 
 #Core GPT
 def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, policy):
-    """
-    Streaming version: yield từng chunk text cho frontend.
-    Giữ nguyên pipeline logic chính, chỉ đổi bước generate sang stream.
-    """
     timer = TimingLog(user_query)
     run_dir = make_run_dir(user_query)
     set_debug_dir(run_dir)
+
     turns = conversation_state.get_turns(user_id)
     effective_query = user_query
 
-    # 1) rewrite (giữ như bản thường)
+    # 1) rewrite
     if turns and needs_rewrite(user_query):
         history_text = format_history(turns)
         try:
-            rewritten = rewrite_query_with_llm(
-                client=client,
-                user_query=user_query,
-                history_text=history_text,
-            )
+            rewritten = rewrite_query_with_llm(client=client, user_query=user_query, history_text=history_text)
             if rewritten:
                 effective_query = rewritten
         except Exception as e:
@@ -367,6 +360,7 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     timer.end("tag_filter_pipeline running")
 
     # 5) retrieval
+    timer.start("retrieval")
     is_list = is_listing_query(norm_query)
     if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}):
         hits = formula_mode_search(client=client, kb=kb, norm_query=norm_query, must_tags=must_tags)
@@ -378,6 +372,7 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
             must_tags=must_tags,
             any_tags=any_tags,
         )
+    timer.end("retrieval")
 
     print("QUERY      :", norm_query)
     print("MUST TAGS  :", must_tags)
@@ -415,12 +410,42 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     context = build_context_from_hits(hits[:max_ctx])
 
+    timer.start("l3_draft")
+    draft = l3_draft_fast(client, effective_query, context)
+    timer.end("l3_draft")
+
+    timer.start("l3_gap")
+    gap = detect_l3_gaps(client, norm_query, draft)
+    timer.end("l3_gap")
+    l3_missing_slots = gap.get("missing_slots", [])
+    # ===========================
+    # T4 — Solution Completion
+    # ===========================
+    if l3_missing_slots:
+        timer.start("t4_retrieval")
+        hits = run_solution_completion(
+            run_dir=run_dir,
+            client=client,
+            kb=kb,
+            user_query=norm_query,
+            hits=hits,
+            must_tags=must_tags,
+            any_tags=any_tags,
+            l3_missing_slots=l3_missing_slots,
+        )
+        timer.end("t4_retrieval")
+        # ưu tiên doc T4
+        hits.sort(key=lambda h: 1 if h.get("t4_origin_query") else 0, reverse=True)
+
+        # rebuild context
+        context = build_context_from_hits(hits[:max_ctx])
+
     yield "✍️ Đang tổng hợp câu trả lời...\n\n"
 
     # 7) generate streaming
-    answer_mode_final = ("listing" if policy.format == "listing" else policy.intent)
-    timer.start("ttft")
-    timer.start("gpt_stream_total") 
+    answer_mode_final = "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else "default"
+    timer.start("final_gpt_ttft")
+    timer.start("final_gpt_total")
     first_tok = True
     parts = []
     stream_failed = False
@@ -435,7 +460,7 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
                 any_tags=any_tags,
             ):
             if first_tok:
-                timer.end("ttft")
+                timer.end("final_gpt_ttft")
                 first_tok = False
 
             parts.append(tok)
@@ -479,39 +504,9 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     else:
         final_answer = "".join(parts)
-    timer.end("gpt_stream_total")
+    timer.end("final_gpt_total")
     final_answer = "".join(parts)
-    gap = detect_l3_gaps(client, norm_query, final_answer)
-    l3_missing_slots = gap.get("missing_slots", [])
-    # ===========================
-    # T4 — Solution Completion
-    # ===========================
-    if l3_missing_slots:
-        hits = run_solution_completion(
-            run_dir=run_dir,
-            client=client,
-            kb=kb,
-            user_query=norm_query,
-            hits=hits,
-            must_tags=must_tags,
-            any_tags=any_tags,
-            l3_missing_slots=l3_missing_slots,
-        )
 
-        # ưu tiên doc T4
-        hits.sort(key=lambda h: 1 if h.get("t4_origin_query") else 0, reverse=True)
-
-        # rebuild context
-        context = build_context_from_hits(hits[:max_ctx])
-
-        # chạy GPT lần 2 (FINAL)
-        final_answer = call_finetune_with_context(
-            client=client,
-            user_query=user_query,
-            context=context,
-            answer_mode=answer_mode_final,
-            rag_mode="STRICT",
-        )
     try:
         append_log_to_csv(
             run_dir,
