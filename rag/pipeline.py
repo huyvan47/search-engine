@@ -24,6 +24,8 @@ from rag.logging.debug_log import debug_log
 from rag.logging.multi_query_logger import _safe_folder_name
 from httpx import RemoteProtocolError
 from rag.logging.logger_csv import append_log_to_csv
+from rag.post_answer.solution_completion import run_solution_completion
+from rag.post_answer.l3_gap_detector import detect_l3_gaps
 # from rag.post_answer.enricher import enrich_answer_if_needed
 from pathlib import Path
 
@@ -406,7 +408,10 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     off_filter_tag_on_doc = policy.intent not in {"disease"}  # y hệt logic gốc :contentReference[oaicite:7]{index=7}
     if not off_filter_tag_on_doc:
-        hits = evidence_gate_by_tags(hits, must_tags=must_tags, any_tags=any_tags)
+        base_hits = [h for h in hits if not h.get("t4_origin_query")]
+        t4_hits   = [h for h in hits if h.get("t4_origin_query")]
+        base_hits = evidence_gate_by_tags(base_hits, must_tags=must_tags, any_tags=any_tags)
+        hits = t4_hits + base_hits
 
     context = build_context_from_hits(hits[:max_ctx])
 
@@ -468,7 +473,6 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
             yield final_answer
             final_answer = "".join(parts) + final_answer
-
         except Exception as e:
             print("[STREAM RECOVERY FAILED]:", e)
             final_answer = "".join(parts)
@@ -477,7 +481,37 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         final_answer = "".join(parts)
     timer.end("gpt_stream_total")
     final_answer = "".join(parts)
+    gap = detect_l3_gaps(client, norm_query, final_answer)
+    l3_missing_slots = gap.get("missing_slots", [])
+    # ===========================
+    # T4 — Solution Completion
+    # ===========================
+    if l3_missing_slots:
+        hits = run_solution_completion(
+            run_dir=run_dir,
+            client=client,
+            kb=kb,
+            user_query=norm_query,
+            hits=hits,
+            must_tags=must_tags,
+            any_tags=any_tags,
+            l3_missing_slots=l3_missing_slots,
+        )
 
+        # ưu tiên doc T4
+        hits.sort(key=lambda h: 1 if h.get("t4_origin_query") else 0, reverse=True)
+
+        # rebuild context
+        context = build_context_from_hits(hits[:max_ctx])
+
+        # chạy GPT lần 2 (FINAL)
+        final_answer = call_finetune_with_context(
+            client=client,
+            user_query=user_query,
+            context=context,
+            answer_mode=answer_mode_final,
+            rag_mode="STRICT",
+        )
     try:
         append_log_to_csv(
             run_dir,

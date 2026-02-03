@@ -7,6 +7,10 @@ class RAGConfig:
     enable_multi_query_log: bool = True
     enable_timing_log: bool = True               # số doc tối đa sau fuse
 
+    # layer 4 result
+    enable_t4_solution_completion = True
+    t4_top_k = 12
+
     # Multi-hop
     multi_hop_top_k = 20
     max_multi_hops = 3
