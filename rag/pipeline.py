@@ -1,6 +1,7 @@
 #Khối import
 import json
 import re
+from datetime import datetime
 from rag.config import RAGConfig
 from rag.router import route_query
 from rag.normalize import normalize_query
@@ -13,14 +14,30 @@ from rag.memory.summarizer import summarize_to_fact
 from rag.conversation_state import conversation_state
 from rag.query_rewriter import needs_rewrite, format_history, rewrite_query_with_llm
 from rag.answer_modes import decide_answer_policy
-from rag.generator import call_finetune_with_context_stream
+from rag.generator import call_finetune_with_context_stream, call_finetune_with_context
 from rag.tag_filter import tag_filter_pipeline
 from rag.logging.timing_logger import TimingLog
+from rag.logging.debug_log import set_debug_dir
 from rag.reasoning.multi_hop import multi_hop_controller
 from typing import List, Tuple, Dict, Any
 from rag.logging.debug_log import debug_log
+from rag.logging.multi_query_logger import _safe_folder_name
+from httpx import RemoteProtocolError
+from rag.logging.logger_csv import append_log_to_csv
 # from rag.post_answer.enricher import enrich_answer_if_needed
 from pathlib import Path
+
+def make_run_dir(query: str):
+    base = Path("debug_runs")
+    base.mkdir(exist_ok=True)
+
+    ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    name = _safe_folder_name(query)
+
+    root = base / f"{ts}__{name}"
+    root.mkdir(parents=True, exist_ok=True)
+
+    return root
 
 FORCE_MUST_TAGS = {
     "mechanisms:luu-dan-manh",
@@ -262,6 +279,8 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     Giữ nguyên pipeline logic chính, chỉ đổi bước generate sang stream.
     """
     timer = TimingLog(user_query)
+    run_dir = make_run_dir(user_query)
+    set_debug_dir(run_dir)
     turns = conversation_state.get_turns(user_id)
     effective_query = user_query
 
@@ -399,31 +418,69 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     timer.start("gpt_stream_total") 
     first_tok = True
     parts = []
-    for tok in call_finetune_with_context_stream(
-        system_prefix=memory_prompt,
-        client=client,
-        user_query=effective_query,
-        context=context,
-        answer_mode=answer_mode_final,
-        must_tags=must_tags,
-        any_tags=any_tags,
-    ):
-        if first_tok:
-            timer.end("ttft")
-            first_tok = False
-        parts.append(tok)
-        yield tok
+    stream_failed = False
+    try:
+        for tok in call_finetune_with_context_stream(
+                system_prefix=memory_prompt,
+                client=client,
+                user_query=effective_query,
+                context=context,
+                answer_mode=answer_mode_final,
+                must_tags=must_tags,
+                any_tags=any_tags,
+            ):
+            if first_tok:
+                timer.end("ttft")
+                first_tok = False
+
+            parts.append(tok)
+            yield tok
+
+    except RemoteProtocolError as e:
+        print("[STREAM DROPPED] OpenAI closed connection mid-stream:", e)
+        stream_failed = True
+
+    except Exception as e:
+        print("[STREAM ERROR] Unknown streaming error:", e)
+        stream_failed = True
+
+    finally:
+        timer.end("gpt_stream_total")
+
+    # -------------------------------------------------
+    # Fallback: re-run in NON-STREAM mode if stream died
+    # -------------------------------------------------
+    if stream_failed:
+        print("[STREAM RECOVERY] Re-running in non-stream mode")
+
+        try:
+            final_answer = call_finetune_with_context(
+            client=client,
+            user_query=user_query,
+            context=context,
+            answer_mode=answer_mode_final,
+            rag_mode="STRICT",
+        )
+
+            # nếu đã stream được một phần → thêm dấu ngắt
+            if parts:
+                yield "\n\n[⚠ Kết nối bị gián đoạn – tiếp tục kết quả đầy đủ]\n\n"
+
+            yield final_answer
+            final_answer = "".join(parts) + final_answer
+
+        except Exception as e:
+            print("[STREAM RECOVERY FAILED]:", e)
+            final_answer = "".join(parts)
+
+    else:
+        final_answer = "".join(parts)
     timer.end("gpt_stream_total")
     final_answer = "".join(parts)
 
     try:
-        from rag.logging.logger_csv import append_log_to_csv
-        from run.main import BASE_DIR
-
-        csv_path = str(BASE_DIR / "rag_logs.csv")
-
         append_log_to_csv(
-            csv_path,
+            run_dir,
             user_query,
             norm_query,
             context,

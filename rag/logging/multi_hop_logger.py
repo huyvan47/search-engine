@@ -35,7 +35,7 @@ def write_multi_hop_logs(
     ]
     """
 
-    base = Path("debug_multi_hop")
+    base = Path("debug_runs")
     base.mkdir(exist_ok=True)
 
     ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

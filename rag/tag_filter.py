@@ -422,7 +422,7 @@ CROP_ALIASES = {
     "bau-bi": ["bi ngo", "qua bi ngo"],
     "sweet-orange": ["cam ngot"],
     "thanh-long": ["qua thanh long", "thanh long"],
-    "thuoc-la": ["cay la", "la"],
+    "thuoc-la": ["thuoc la"],
     "vegetable": ["rau an"],
     "vegetable-crops": ["cay rau"],
     "vegetables": ["rau an"],
@@ -1377,7 +1377,7 @@ def extract_tags(norm_query_raw: str) -> Dict:
     pests = match_aliases(norm_query_raw, PEST_ALIASES, normalize_entity)
 
     products = match_aliases(norm_query_raw, PRODUCT_ALIASES, normalize_entity)
-    brands = match_aliases(norm_query_raw, BRAND_ALIASES, normalize_entity)
+    # brands = match_aliases(norm_query_raw, BRAND_ALIASES, normalize_entity)
     formulas = match_aliases(norm_query_raw, FORMULA_ALIASES, normalize_entity)
     forms = match_aliases(norm_query_raw, FORMULATION_ALIASES, normalize_entity)
     mechanisms = match_aliases(norm_query_raw, MECHANISMS_ALIASES, normalize_entity)
@@ -1413,8 +1413,8 @@ def extract_tags(norm_query_raw: str) -> Dict:
     # Product/Brand/Formulation/Formula: MUST
     for p in products:
         must_tags.add(f"product:{p}")
-    for b in brands:
-        must_tags.add(f"brand:{b}")
+    # for b in brands:
+    #     must_tags.add(f"brand:{b}")
     for f in forms:
         must_tags.add(f"formulation:{f}")
     for fm in formulas:
@@ -1471,10 +1471,7 @@ def tag_filter_pipeline(query: str) -> Dict:
 
 if __name__ == "__main__":
     tests = [
-        "thuốc trị cỏ cho cây khoai mì",
-        "thuốc trị bọ trĩ",
-        "tất cả sản phẩm trị cỏ mần trầu",
-        "Tìm cho tôi sản phẩm phù hợp với công thức xông hơi mạnh + lưu dẫn hoặc lưu dẫn mạnh",
+        "Trong 3 công thức trên, công thức nào là mạnh nhất?",
     ]
 
     for q in tests:

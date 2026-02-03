@@ -3,9 +3,10 @@ import pandas as pd
 import json
 from datetime import datetime
 from rag.logging.debug_log import debug_log
+from pathlib import Path
 
 def append_log_to_csv(
-    csv_path: str,
+    run_dir: Path,
     user_query: str,
     norm_query: str,
     context_build:str,
@@ -14,6 +15,7 @@ def append_log_to_csv(
     res: dict,
     route: str = "RAG",
 ):
+    csv_path = run_dir / "rag.csv"
     """
     Append 1 dòng log vào CSV (an toàn khi file đang được mở để xem).
     """

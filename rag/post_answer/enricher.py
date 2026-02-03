@@ -1,9 +1,14 @@
+import re
 from rag.post_answer.chemical_extractor import (
     extract_chemicals_from_matched_tags,
     extract_primary_chemical_from_answer,
 )
 from rag.post_answer.global_knowledge import query_global_knowledge
 from rag.post_answer.detectors import should_enrich_post_answer
+from rag.retriever import search as retrieve_search
+from rag.tag_filter import normalize_entity, PRODUCT_ALIASES, tag_filter_pipeline
+from typing import List, Tuple, Dict, Any
+
 
 
 def enrich_answer_if_needed(
@@ -98,3 +103,98 @@ def enrich_answer_if_needed(
     )
 
     return answer_text.rstrip() + appendix
+
+def detect_products_from_text(text: str) -> List[str]:
+    """
+    Trả về list product keys (canonical ids) xuất hiện trong answer
+    """
+    norm_text = normalize_entity(text)
+
+    hits = []
+
+    for product_key, aliases in PRODUCT_ALIASES.items():
+        for a in aliases:
+            na = normalize_entity(a)
+            if na and na in norm_text:
+                hits.append(product_key)
+                break
+
+    return list(set(hits))
+
+def summarize_product_from_hits(product, hits):
+    """
+    Tìm hoạt chất + cơ chế từ các doc trong hits.
+    """
+    actives = set()
+    mechs = set()
+
+    for h in hits:
+        blob = " ".join([
+            str(h.get("question","")),
+            str(h.get("answer","")),
+            str(h.get("tags_v2","")),
+        ]).lower()
+
+        if product.lower() in blob:
+            tv2 = str(h.get("tags_v2",""))
+            for part in tv2.split("|"):
+                if part.startswith("chemical:"):
+                    actives.add(part.split(":",1)[1])
+                if part.startswith("mechanisms:"):
+                    mechs.add(part.split(":",1)[1])
+
+    return list(actives), list(mechs)
+
+
+def enrich_answer_with_product_knowledge(
+    *, 
+    client,
+    kb,
+    answer_text: str,
+    hits: list,
+    top_k: int = 5
+) -> str:
+    """
+    Hậu xử lý câu trả lời: gắn hoạt chất + cơ chế cho sản phẩm nếu thiếu.
+    """
+
+    products = detect_products_from_text(answer_text)
+    if not products:
+        return answer_text
+
+    enriched = answer_text
+
+    for p in products:
+        actives, mechs = summarize_product_from_hits(p, hits)
+
+        # Nếu chưa đủ → search bổ sung riêng cho product
+        if not actives and not mechs:
+            tag_result = tag_filter_pipeline(p)
+            hits_p = retrieve_search(
+                client=client,
+                kb=kb,
+                norm_query=p,
+                top_k=top_k,
+                must_tags=tag_result.get("must", []),
+                any_tags=tag_result.get("any", []),
+            )
+            actives, mechs = summarize_product_from_hits(p, hits_p)
+
+        if actives or mechs:
+            desc = []
+            if actives:
+                desc.append(", ".join(actives))
+            if mechs:
+                desc.append("cơ chế: " + ", ".join(mechs))
+
+            enrich_str = f"{p} ({' – '.join(desc)})"
+
+            # thay thế nếu trong answer có đoạn mơ hồ
+            enriched = re.sub(
+                rf"{re.escape(p)}\s*\([^)]*không ghi rõ[^)]*\)",
+                enrich_str,
+                enriched,
+                flags=re.IGNORECASE
+            )
+
+    return enriched

@@ -1,12 +1,17 @@
 from datetime import datetime
 
-DEBUG_LOG_FILE = "debug_flow.log"
+CURRENT_DEBUG_DIR = None
+from pathlib import Path
+
+def set_debug_dir(path: Path):
+    global CURRENT_DEBUG_DIR
+    CURRENT_DEBUG_DIR = path
 
 def debug_log(*args):
-    """
-    Ghi log giống print(), nhưng ghi vào file (append)
-    """
-    with open(DEBUG_LOG_FILE, "a", encoding="utf-8") as f:
-        for arg in args:
-            f.write(str(arg) + "\n")
-        f.write("\n")  # cách dòng cho dễ đọc
+    if not CURRENT_DEBUG_DIR:
+        return
+
+    with open(CURRENT_DEBUG_DIR / "debug.log", "a", encoding="utf-8") as f:
+        for a in args:
+            f.write(str(a) + "\n")
+        f.write("\n")

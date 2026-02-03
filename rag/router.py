@@ -63,13 +63,21 @@ def route_query(client, user_query: str) -> str:
     # ============================================
 
     product_context = re.search(
-        r"\b(thuốc|sản phẩm|mã|giá|đại lý|mua)\b",
+        r"\b(thuốc|sản phẩm|mã|giá|đại lý|mua|công thức)\b",
         q
     )
     
     if product_context:
         return "RAG"
 
+    treatment_intent = re.search(
+        r"\b(công thức trị|công thức trừ|công thức diệt|phác đồ|quy trình trị|cách trị|biện pháp trị|diệt|phòng trừ|xử lý|đặc trị)\b",
+        q
+    )
+
+    if treatment_intent:
+        return "RAG"
+    
     definition_signals = [
         # ---------------------------
         # 1) Mẫu câu hỏi định nghĩa / giáo trình
@@ -77,7 +85,8 @@ def route_query(client, user_query: str) -> str:
         r"(là gì|nghĩa là gì|định nghĩa|khái niệm|hiểu là gì|gì\??)",
         r"\b(bao gồm|gồm những|gồm các|thuộc nhóm nào)\b",
         r"\b(phân biệt|khác nhau|so sánh|giống nhau)\b",
-        r"(vì sao|tại sao|nguyên nhân|cơ chế|nguyên lý|sao?)",
+        r"(|nguyên nhân|cơ chế|nguyên lý)",
+        # r"(vì sao|tại sao|nguyên nhân|cơ chế|nguyên lý|sao?)",
         r"\b(ưu điểm|nhược điểm|lợi ích|rủi ro)\b",
         r"\b(nên|không nên|phương án)\b",
 
@@ -135,16 +144,6 @@ def route_query(client, user_query: str) -> str:
 
     if any(re.search(p, q) for p in definition_signals):
         return "GLOBAL"
-
-
-
-    treatment_intent = re.search(
-        r"\b(công thức trị|công thức trừ|công thức diệt|phác đồ|quy trình trị|cách trị|biện pháp trị|diệt|phòng trừ|xử lý|đặc trị)\b",
-        q
-    )
-
-    if treatment_intent:
-        return "RAG"
 
     result = tag_filter_pipeline(q)
     must_tags = result.get("must", [])
