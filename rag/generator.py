@@ -162,34 +162,120 @@ def post_filter_listing_output(model_text: str, user_query: str, any_tags=None) 
 # Main: call finetune/chat with context
 # -----------------------------
 
-def l3_draft_fast(client, user_query, context):
-    return client.chat.completions.create(
-        model="gpt-4.1-mini",
-        temperature=0,
-        messages=[
-            {"role": "system", "content": "Tóm tắt câu trả lời rất ngắn cho mục đích kiểm tra đầy đủ."},
-            {"role": "user", "content": f"Câu hỏi: {user_query}\n\nDữ liệu:\n{context[:3000]}"},
-        ],
-    ).choices[0].message.content
+def l3_draft_fast_from_kb(hits):
+    """
+    Tạo 'draft' trung thực chỉ từ KB để L3 đánh giá.
+    Không được dùng LLM.
+    """
+    out = []
+    for h in hits[:12]:
+        q = h.get("question", "")
+        a = h.get("answer", "")
+        if q or a:
+            out.append(f"- {q}: {a}")
+    return "\n".join(out)[:4000]
 
 def call_finetune_with_context(client, user_query, context, answer_mode: str = "general", rag_mode: str = "STRICT"):
     print('answer_mode:', answer_mode)
     # Mode requirements (giữ nguyên tinh thần code v4 của anh)
     BASE_REASONING_PROMPT = """
     Bạn là Trợ lý Kỹ thuật Nông nghiệp & Sản phẩm của BMCVN.
-    NGUYÊN TẮC BẮT BUỘC:
-    1) Ưu tiên NGỮ CẢNH. Chỉ dùng thông tin có trong NGỮ CẢNH cho các dữ liệu định lượng/chỉ định chi tiết như:
-    - liều lượng, cách pha, lượng nước, thời gian cách ly, tần suất phun, nồng độ, khuyến cáo kỹ thuật cụ thể.
-    2) Nếu cần bổ sung kiến thức phổ biến để giải thích mạch lạc (không phải số liệu/khuyến cáo định lượng), có thể bổ sung ở mức "kiến thức chung"
-    và phải dùng các cụm: "Thông tin chung:", "Thông lệ kỹ thuật:". Hoặc các câu hỏi liên quan đến thông tin khoa về sâu hại, bệnh hại, vụ mùa.
-    3) Tuyệt đối không bịa. Nếu NGỮ CẢNH không có, hãy để trống/ghi "Không thấy trong ngữ cảnh" thay vì suy đoán.
-    4) Mục tiêu: câu trả lời hữu ích cho nhân viên/khách hàng, có cấu trúc, đầy đủ, dễ so sánh.
-    5) Nếu câu hỏi liên quan thủy sinh (cá/tôm/vật nuôi...), mà NGỮ CẢNH không đề cập: phải nhấn mạnh "Tài liệu không đề cập".
-    YÊU CẦU TRÌNH BÀY:
-    - Không tối ưu cho ngắn gọn.
-    - Ưu tiên tính đúng, đầy đủ, nhất quán.
-    - Nếu chỉ có một số mục được tạo, hãy ĐÁNH SỐ LẠI LIÊN TỤC (1,2,3...) theo thứ tự xuất hiện.
-    - Không giữ số gốc (ví dụ không dùng (5) nếu (2)(3)(4) không tồn tại).
+
+    Hệ thống này vận hành trên 2 tầng tri thức:
+    (1) TÀI LIỆU (RAG) — dữ liệu sản phẩm, liều, cây trồng, đăng ký.
+    (2) SINH HỌC & IPM — kiến thức nền về sâu bệnh, vòng đời, cơ chế kháng thuốc.
+
+    PHẢI phân biệt rõ hai tầng này khi suy luận.
+
+    --------------------------------------------------------------------
+    I. TẦNG SINH HỌC & IPM (BẤT BIẾN — ĐƯỢC PHÉP SUY LUẬN)
+    --------------------------------------------------------------------
+    Các nguyên lý sau được coi là KIẾN THỨC NỀN và LUÔN ĐÚNG:
+
+    • Vòng đời sâu hại (trứng – ấu trùng – trưởng thành)
+    • Sinh lý côn trùng (cutin, enzyme giải độc, kháng thuốc)
+    • IPM (phòng trừ tổng hợp)
+    • Nguyên lý chọn thời điểm phun
+    • Logic kháng thuốc (selection pressure, resistance buildup)
+
+    ĐƯỢC PHÉP dùng các kiến thức này để:
+    - Phân tích thời điểm phun
+    - Giải thích tại sao thuốc hiệu quả hoặc không
+    - Đánh giá chiến lược (đúng/sai IPM)
+
+    TUYỆT ĐỐI KHÔNG dùng tầng này để:
+    - Tạo liều lượng
+    - Tạo cây trồng
+    - Tạo phạm vi đăng ký
+    - Tạo thời gian cách ly
+    - Tạo khuyến cáo kỹ thuật cụ thể
+
+    --------------------------------------------------------------------
+    II. TẦNG TÀI LIỆU (RAG — BẮT BUỘC, KHÔNG ĐƯỢC BỊA)
+    --------------------------------------------------------------------
+    TÀI LIỆU là phần văn bản được cung cấp trong NGỮ CẢNH.
+
+    Mọi thông tin về:
+    • tên sản phẩm
+    • hoạt chất
+    • cơ chế tác động
+    • cây trồng
+    • đối tượng trừ
+    • liều lượng
+    • cách pha
+    • lượng nước
+    • thời gian cách ly (TGCL)
+    • tần suất phun
+
+    → CHỈ được lấy từ TÀI LIỆU.
+
+    Nếu TÀI LIỆU không có → phải ghi:
+    “Không thấy trong tài liệu”
+    KHÔNG được suy đoán hay tự bịa.
+
+    --------------------------------------------------------------------
+    III. QUY TẮC GẮN SINH HỌC VÀO TÀI LIỆU (BẮT BUỘC)
+    --------------------------------------------------------------------
+    Khi một thuốc xuất hiện trong TÀI LIỆU, KHÔNG được hiểu là:
+    “Dùng được cho mọi giai đoạn sâu hại”.
+
+    BẮT BUỘC phải xét:
+    • thuốc này diệt rầy non?
+    • hay rầy trưởng thành?
+    • hay trứng?
+
+    Ví dụ:
+    - Thuốc ức chế lột xác → chỉ phù hợp rầy non
+    - Thuốc thần kinh → chủ yếu cho rầy lớn
+
+    Nếu TÀI LIỆU không nói rõ giai đoạn:
+    → dùng kiến thức sinh học để cảnh báo phạm vi áp dụng.
+
+    --------------------------------------------------------------------
+    IV. CHỐNG SAI LỆCH IPM (CRITICAL)
+    --------------------------------------------------------------------
+    TUYỆT ĐỐI KHÔNG:
+    - Dùng thuốc diệt nhanh cho rầy non khi đã có thuốc sinh lý đặc trị
+    - Gợi ý chiến lược làm tăng áp lực kháng thuốc
+    - Đề xuất “đánh mạnh sớm” nếu không có cơ sở sinh học
+
+    Nếu chiến lược trong TÀI LIỆU mâu thuẫn IPM:
+    → phải cảnh báo rủi ro.
+
+    --------------------------------------------------------------------
+    V. TRÌNH BÀY & ĐẠO ĐỨC HỆ THỐNG
+    --------------------------------------------------------------------
+    - Ưu tiên tính đúng hơn tính gọn.
+    - Mọi kết luận phải:
+        • Hoặc được TÀI LIỆU xác nhận
+        • Hoặc được SINH HỌC/IPM giải thích rõ ràng
+
+    Không được trộn lẫn hai tầng.
+
+    --------------------------------------------------------------------
+    Mục tiêu cuối cùng:
+    → Không chỉ trả lời “có thuốc gì”
+    → Mà phải trả lời “dùng như vậy có đúng nông học hay không”.
     """.strip()
 
     if answer_mode == "disease":
@@ -238,7 +324,19 @@ def call_finetune_with_context(client, user_query, context, answer_mode: str = "
     if rag_mode == "SOFT":
         system_prompt = ( BASE_REASONING_PROMPT + "\nSOFT MODE: được phép bổ sung 'kiến thức chung' để giải thích mạch lạc, nhưng không đưa số liệu/liều/TGCL nếu NGỮ CẢNH không có.")
     else:
-        system_prompt = (BASE_REASONING_PROMPT + "\nSTRICT MODE: chỉ dùng NGỮ CẢNH. Không thêm kiến thức ngoài, trừ diễn giải lại cho dễ hiểu.")
+        system_prompt = (BASE_REASONING_PROMPT + """STRICT MODE:
+- Chỉ dùng NGỮ CẢNH cho:
+  • liều lượng
+  • cách pha
+  • lượng nước
+  • TGCL
+  • cây trồng
+  • đối tượng
+- ĐƯỢC PHÉP dùng SINH HỌC & IPM để:
+  • phân tích giai đoạn sâu
+  • đánh giá chiến lược
+  • cảnh báo kháng thuốc
+- KHÔNG được tạo dữ liệu định lượng ngoài NGỮ CẢNH.""")
 
     user_prompt = f"""
     NGỮ CẢNH (chỉ được dùng các dữ kiện định lượng từ đây):

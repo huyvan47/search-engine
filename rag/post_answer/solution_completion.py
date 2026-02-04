@@ -1,9 +1,10 @@
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from rag.tag_filter import tag_filter_pipeline
 from rag.retriever import search as retrieve_search
 from rag.config import RAGConfig
 from rag.logging.t4_logger import append_t4_log_to_csv
+
 
 # -----------------------------
 # Helpers
@@ -32,6 +33,52 @@ def _draft_answer_stub(base_query: str, hits: List[dict]) -> str:
     if not hits:
         return "Không tìm thấy dữ liệu phù hợp trong hệ thống."
     return f"Dựa trên tài liệu hiện có cho câu hỏi '{base_query}', có thể tồn tại giải pháp phối hợp nhưng chưa đủ thành phần cụ thể."
+
+
+def t4_kb_validator(*, l3_gap: dict, hits: List[dict]) -> Dict[str, Any]:
+    """
+    Quyết định xem T4 có được phép chạy hay không.
+
+    Trả về:
+    {
+        mode: "skip" | "kb_insufficient" | "need_retrieval"
+        reason: str
+    }
+    """
+
+    missing = set(l3_gap.get("missing_slots", []))
+
+    # L3 nói là đủ → không được chạy T4
+    if not missing:
+        return {
+            "mode": "skip",
+            "reason": "L3_answer_complete"
+        }
+
+    # Có missing slots nhưng KB đã có đủ doc → không chạy T4
+    if hits:
+        covered = set()
+        for h in hits:
+            tags = h.get("tags_v2") or []
+            for t in tags:
+                if "chemical" in t or "product" in t:
+                    covered.add("need_pesticide")
+                if "dose" in t or "dosage" in t:
+                    covered.add("need_dosage_or_rate")
+                if "timing" in t:
+                    covered.add("need_timing")
+
+        if covered & missing:
+            return {
+                "mode": "skip",
+                "reason": "KB_already_contains_slots"
+            }
+
+    # KB thiếu thật → cho phép T4 retrieve
+    return {
+        "mode": "need_retrieval",
+        "reason": "KB_missing_slots"
+    }
 
 
 # -----------------------------
@@ -175,25 +222,31 @@ def run_solution_completion(
     hits: List[dict],
     must_tags: List[str],
     any_tags: List[str],
-    l3_missing_slots: List[str],   # 🔥 TÍN HIỆU DUY NHẤT
-) -> List[dict]:
+    l3_missing_slots: List[str],
+) -> Tuple[List[dict], Dict[str, Any]]:
 
-    added = []
     slot_report = {
         "missing_slots": l3_missing_slots,
         "reason": "from_L3"
     }
 
-    # -------------------------------
-    # T4 chỉ chạy khi L3 nói thiếu
-    # -------------------------------
-    if hits and l3_missing_slots and bool(getattr(RAGConfig, "enable_t4_solution_completion", True)):
+    decision = t4_kb_validator(
+        l3_gap=slot_report,
+        hits=hits
+    )
+
+    added = []
+    intents = []
+
+    # ============================
+    # T4 chỉ chạy nếu KB thật sự thiếu
+    # ============================
+    if decision["mode"] == "need_retrieval" and hits and bool(getattr(RAGConfig, "enable_t4_solution_completion", True)):
 
         seen_ids = {h.get("id") for h in hits if h.get("id")}
         used_queries = {user_query}
 
-        # Map slot → query
-        intents = []
+        # map slot → query
         for s in l3_missing_slots:
             if s == "need_pesticide":
                 intents.append({"slot": s, "query": "thuốc trừ sâu"})
@@ -230,11 +283,25 @@ def run_solution_completion(
         run_dir=run_dir,
         user_query=user_query,
         norm_query=user_query,
-        slot_report=slot_report,
-        intents_executed=[i["query"] for i in intents] if l3_missing_slots else [],
+        slot_report={
+            **slot_report,
+            "t4_mode": decision["mode"],
+            "t4_reason": decision["reason"]
+        },
+        intents_executed=[i["query"] for i in intents],
         added_docs=added,
         ctx_docs_total=ctx_docs_total,
         t4_docs_in_ctx=t4_docs_in_ctx,
     )
 
-    return hits + added
+    t4_report = {
+        "l3_missing_slots": l3_missing_slots,
+        "t4_mode": decision["mode"],
+        "t4_reason": decision["reason"],
+        "intents": intents,
+        "docs_added": len(added)
+    }
+    print("l3-data: ", t4_report)
+
+    return hits + added, t4_report
+

@@ -14,7 +14,7 @@ from rag.memory.summarizer import summarize_to_fact
 from rag.conversation_state import conversation_state
 from rag.query_rewriter import needs_rewrite, format_history, rewrite_query_with_llm
 from rag.answer_modes import decide_answer_policy
-from rag.generator import call_finetune_with_context_stream, call_finetune_with_context, l3_draft_fast
+from rag.generator import call_finetune_with_context_stream, call_finetune_with_context, l3_draft_fast_from_kb
 from rag.tag_filter import tag_filter_pipeline
 from rag.logging.timing_logger import TimingLog
 from rag.logging.debug_log import set_debug_dir
@@ -26,6 +26,7 @@ from httpx import RemoteProtocolError
 from rag.logging.logger_csv import append_log_to_csv
 from rag.post_answer.solution_completion import run_solution_completion
 from rag.post_answer.l3_gap_detector import detect_l3_gaps
+from rag.post_answer.t5_knowledge_fallback import t5_knowledge_fallback
 # from rag.post_answer.enricher import enrich_answer_if_needed
 from pathlib import Path
 
@@ -40,6 +41,17 @@ def make_run_dir(query: str):
     root.mkdir(parents=True, exist_ok=True)
 
     return root
+
+KB_FALLBACK_SLOTS = {
+    "need_pesticide",
+    "need_foliar_fertilizer",
+    "need_mix_compatibility",
+    "need_dosage_or_rate",
+    "need_timing",
+    "need_crop",
+    "need_pest_or_disease",
+    "need_general_knowledge",
+}
 
 FORCE_MUST_TAGS = {
     "mechanisms:luu-dan-manh",
@@ -287,7 +299,11 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     if turns and needs_rewrite(user_query):
         history_text = format_history(turns)
         try:
-            rewritten = rewrite_query_with_llm(client=client, user_query=user_query, history_text=history_text)
+            rewritten = rewrite_query_with_llm(
+                client=client,
+                user_query=user_query,
+                history_text=history_text
+            )
             if rewritten:
                 effective_query = rewritten
         except Exception as e:
@@ -297,7 +313,6 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     route = route_query(client, effective_query)
     if route == "GLOBAL":
         model = "gpt-4.1"
-
         yield "🌍 Đang trả lời bằng tri thức tổng quát...\n\n"
 
         resp = client.chat.completions.create(
@@ -322,22 +337,20 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
         final_text = "".join(parts)
 
-        # memory + log y như non-stream
         conversation_state.append(user_id, "user", user_query)
         conversation_state.append(user_id, "assistant", final_text)
-
         log_event(user_id, "user", user_query)
         log_event(user_id, "assistant", final_text)
 
         timer.finish(RAGConfig.enable_timing_log)
-
         return
+
     timer.start("normalize")
     norm_query = normalize_query(client, effective_query)
     norm_lower = norm_query.lower()
     timer.end("normalize")
 
-    # 3) read memory (giữ như bản thường)
+    # 3) read memory + force_rag
     timer.start("read_memory and check route")
     memory_facts = read_memory(client=client, user_id=user_id, query=norm_query)
     memory_prompt = ""
@@ -349,10 +362,10 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         route = "RAG"
     timer.end("read_memory and check route")
 
-    # (tuỳ chọn) stream status cho UI
+    # UI status
     yield "⏳ Đang truy vấn dữ liệu...\n\n"
 
-    # 4) tag filter pipeline (giữ như bản thường)
+    # 4) tag filter
     timer.start("tag_filter_pipeline running")
     result = tag_filter_pipeline(norm_query)
     must_tags = result.get("must", [])
@@ -363,7 +376,12 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     timer.start("retrieval")
     is_list = is_listing_query(norm_query)
     if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}):
-        hits = formula_mode_search(client=client, kb=kb, norm_query=norm_query, must_tags=must_tags)
+        hits = formula_mode_search(
+            client=client,
+            kb=kb,
+            norm_query=norm_query,
+            must_tags=must_tags
+        )
     else:
         hits = multi_hop_controller(
             client=client,
@@ -381,27 +399,26 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
     debug_log("MUST TAGS  :", must_tags)
     debug_log("ANY TAGS   :", any_tags)
 
-    timer.start("build_context running")
-
     if not hits:
         yield "Không tìm thấy dữ liệu phù hợp."
         return
-    
+
+    # fused score, tag hits, ordering
     for h in hits:
         h["fused_score"] = fused_score(h)
         h["tag_hits"] = _count_tag_hits(h, any_tags, must_tags)
 
     hits = preserve_search_order(hits)
-
     primary_doc = hits[0]
 
-    # 6) build context
+    # 6) build context (pre T3/T4/T5)
+    timer.start("build_context")
     base_ctx = choose_adaptive_max_ctx(hits, is_listing=is_list)
     max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
 
     policy = decide_answer_policy(effective_query, primary_doc, force_listing=is_list)
 
-    off_filter_tag_on_doc = policy.intent not in {"disease"}  # y hệt logic gốc :contentReference[oaicite:7]{index=7}
+    off_filter_tag_on_doc = policy.intent not in {"disease"}
     if not off_filter_tag_on_doc:
         base_hits = [h for h in hits if not h.get("t4_origin_query")]
         t4_hits   = [h for h in hits if h.get("t4_origin_query")]
@@ -409,21 +426,31 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         hits = t4_hits + base_hits
 
     context = build_context_from_hits(hits[:max_ctx])
+    timer.end("build_context")
+
+    # ===========================
+    # L3 — KB Gap Detector
+    # ===========================
+    t4_report = None
 
     timer.start("l3_draft")
-    draft = l3_draft_fast(client, effective_query, context)
+    # IMPORTANT: draft trung thực từ KB (không dùng LLM để tránh che lỗ hổng KB)
+    kb_draft = l3_draft_fast_from_kb(hits)
     timer.end("l3_draft")
 
     timer.start("l3_gap")
-    gap = detect_l3_gaps(client, norm_query, draft)
+    gap = detect_l3_gaps(client, norm_query, kb_draft)
     timer.end("l3_gap")
-    l3_missing_slots = gap.get("missing_slots", [])
+
+    l3_missing_slots = gap.get("missing_slots", []) or []
+
     # ===========================
     # T4 — Solution Completion
     # ===========================
     if l3_missing_slots:
         timer.start("t4_retrieval")
-        hits = run_solution_completion(
+        # NOTE: run_solution_completion phải return (hits, t4_report)
+        hits, t4_report = run_solution_completion(
             run_dir=run_dir,
             client=client,
             kb=kb,
@@ -434,31 +461,76 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
             l3_missing_slots=l3_missing_slots,
         )
         timer.end("t4_retrieval")
+
         # ưu tiên doc T4
         hits.sort(key=lambda h: 1 if h.get("t4_origin_query") else 0, reverse=True)
 
-        # rebuild context
+        timer.start("build_context_t4")
         context = build_context_from_hits(hits[:max_ctx])
+        timer.end("build_context_t4")
 
+    # ===========================
+    # T5 — Knowledge Fallback
+    # ===========================
+    # 1) Nếu T4 report nói KB không có solution → bật T5
+    # 2) Hoặc nếu L3 có need_general_knowledge mà T4_report None (case bypass) → cũng bật T5
+    need_kb_fallback = False
+
+    missing_after_t4 = []
+    if t4_report is not None:
+        raw = t4_report.get("l3_missing_slots") or t4_report.get("missing_slots") or []
+        missing_after_t4 = raw if isinstance(raw, list) else []
+    else:
+        missing_after_t4 = l3_missing_slots if isinstance(l3_missing_slots, list) else []
+
+    # Chỉ cần còn need_general_knowledge là bật T5
+    need_kb_fallback = any(
+        slot in KB_FALLBACK_SLOTS
+        for slot in missing_after_t4
+    )
+
+    final_system_override = ""
+    if need_kb_fallback:
+        timer.start("t5_fallback")
+        kb_fallback_text = t5_knowledge_fallback(
+            client=client,
+            user_query=norm_query,
+            missing_slots=missing_after_t4,
+            context=context,
+        )
+        context += "\n\n[KIẾN THỨC NỀN]\n" + (kb_fallback_text or "")
+        timer.end("t5_fallback")
+        final_system_override = """
+        ⚠️ INTERNAL DATA IS INSUFFICIENT.
+
+        You MUST use the [KIẾN THỨC NỀN] section
+        to complete the user's objective.
+        Do not answer using only internal data.
+        """
+    
     yield "✍️ Đang tổng hợp câu trả lời...\n\n"
 
-    # 7) generate streaming
-    answer_mode_final = "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else "default"
+    # 7) generate streaming (FINAL)
+    answer_mode_final = (
+        "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else "default"
+    )
+
     timer.start("final_gpt_ttft")
     timer.start("final_gpt_total")
     first_tok = True
     parts = []
     stream_failed = False
+
     try:
         for tok in call_finetune_with_context_stream(
-                system_prefix=memory_prompt,
-                client=client,
-                user_query=effective_query,
-                context=context,
-                answer_mode=answer_mode_final,
-                must_tags=must_tags,
-                any_tags=any_tags,
-            ):
+            system_prefix=memory_prompt + final_system_override,
+            client=client,
+            user_query=effective_query,
+            context=context,  # context đã có T4/T5 nếu có
+            answer_mode=answer_mode_final,
+            must_tags=must_tags,
+            any_tags=any_tags,
+        ):
             if first_tok:
                 timer.end("final_gpt_ttft")
                 first_tok = False
@@ -475,38 +547,33 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         stream_failed = True
 
     finally:
-        timer.end("gpt_stream_total")
+        # luôn end tổng thời gian stream
+        timer.end("final_gpt_total")
 
     # -------------------------------------------------
     # Fallback: re-run in NON-STREAM mode if stream died
     # -------------------------------------------------
     if stream_failed:
         print("[STREAM RECOVERY] Re-running in non-stream mode")
-
         try:
             final_answer = call_finetune_with_context(
-            client=client,
-            user_query=user_query,
-            context=context,
-            answer_mode=answer_mode_final,
-            rag_mode="STRICT",
-        )
-
-            # nếu đã stream được một phần → thêm dấu ngắt
+                client=client,
+                user_query=user_query,
+                context=context,
+                answer_mode=answer_mode_final,
+                rag_mode="STRICT",
+            )
             if parts:
                 yield "\n\n[⚠ Kết nối bị gián đoạn – tiếp tục kết quả đầy đủ]\n\n"
-
             yield final_answer
             final_answer = "".join(parts) + final_answer
         except Exception as e:
             print("[STREAM RECOVERY FAILED]:", e)
             final_answer = "".join(parts)
-
     else:
         final_answer = "".join(parts)
-    timer.end("final_gpt_total")
-    final_answer = "".join(parts)
 
+    # 8) log CSV
     try:
         append_log_to_csv(
             run_dir,
@@ -517,20 +584,14 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
                 "text": final_answer,
                 "route": route,
                 "norm_query": norm_query,
+                "missing_slots": l3_missing_slots,
             },
             route
         )
-
     except Exception as e:
         print("[RAG CSV LOG ERROR]:", e)
 
-
-    # 8) enrich (⚠️ enrich là 1 call LLM nữa nên sẽ “đứng”; có 2 lựa chọn)
-    # Option A (khuyến nghị cho streaming mượt): bỏ enrich trong stream
-    # Option B: enrich xong rồi append thêm phần "Bổ sung" sau cùng (không stream)
-    # final_answer = enrich_answer_if_needed(...)
-
-    # 9) write memory/log (giữ như bản thường)
+    # 9) memory/log
     conversation_state.append(user_id, "user", user_query)
     conversation_state.append(user_id, "assistant", final_answer)
     log_event(user_id, "user", user_query)

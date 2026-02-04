@@ -77,7 +77,43 @@ def route_query(client, user_query: str) -> str:
 
     if treatment_intent:
         return "RAG"
-    
+
+    result = tag_filter_pipeline(q)
+    must_tags = result.get("must", [])
+    soft_tags = result.get("soft", [])
+    any_tags = result.get("any", [])
+
+    if force_rag_by_tags(must_tags, soft_tags, any_tags):
+            return "RAG"
+
+    # ============================================
+    # ) Ngoại lệ quan trọng:
+    #    Hỏi kiến thức thuần về hoạt chất -> GLOBAL
+    # ============================================
+
+    if CHEMICAL_REGEX.search(q):
+
+        product_intent = re.search(
+            r"\b("
+            r"giá|mua|mã|đại lý|bán ở đâu|"
+            r"có trong sản phẩm|"
+            r"có trong các sản phẩm|"
+            r"sản phẩm nào chứa|"
+            r"thuốc nào chứa|"
+            r"thuốc có chứa|"
+            r"thuốc có|"
+            r"thuốc chứa|"
+            r"sản phẩm chứa|"
+            r"chứa hoạt chất"
+            r")\b",
+            q
+        )
+
+        # Nếu không có dấu hiệu hỏi sản phẩm -> GLOBAL
+        if not product_intent:
+            return "GLOBAL"
+
+
     definition_signals = [
         # ---------------------------
         # 1) Mẫu câu hỏi định nghĩa / giáo trình
@@ -85,10 +121,9 @@ def route_query(client, user_query: str) -> str:
         r"(là gì|nghĩa là gì|định nghĩa|khái niệm|hiểu là gì|gì\??)",
         r"\b(bao gồm|gồm những|gồm các|thuộc nhóm nào)\b",
         r"\b(phân biệt|khác nhau|so sánh|giống nhau)\b",
-        r"(|nguyên nhân|cơ chế|nguyên lý)",
-        # r"(vì sao|tại sao|nguyên nhân|cơ chế|nguyên lý|sao?)",
+        r"(vì sao|tại sao|nguyên nhân|cơ chế|nguyên lý|sao?|cách xử lý)",
         r"\b(ưu điểm|nhược điểm|lợi ích|rủi ro)\b",
-        r"\b(nên|không nên|phương án)\b",
+        r"\b(nên|không nên|phương án|cách thức)\b",
 
         # ---------------------------
         # 2) Nhận diện – triệu chứng – đặc điểm
@@ -144,42 +179,6 @@ def route_query(client, user_query: str) -> str:
 
     if any(re.search(p, q) for p in definition_signals):
         return "GLOBAL"
-
-    result = tag_filter_pipeline(q)
-    must_tags = result.get("must", [])
-    soft_tags = result.get("soft", [])
-    any_tags = result.get("any", [])
-
-    if force_rag_by_tags(must_tags, soft_tags, any_tags):
-            return "RAG"
-
-    # ============================================
-    # ) Ngoại lệ quan trọng:
-    #    Hỏi kiến thức thuần về hoạt chất -> GLOBAL
-    # ============================================
-
-    if CHEMICAL_REGEX.search(q):
-
-        product_intent = re.search(
-            r"\b("
-            r"giá|mua|mã|đại lý|bán ở đâu|"
-            r"có trong sản phẩm|"
-            r"có trong các sản phẩm|"
-            r"sản phẩm nào chứa|"
-            r"thuốc nào chứa|"
-            r"thuốc có chứa|"
-            r"thuốc có|"
-            r"thuốc chứa|"
-            r"sản phẩm chứa|"
-            r"chứa hoạt chất"
-            r")\b",
-            q
-        )
-
-        # Nếu không có dấu hiệu hỏi sản phẩm -> GLOBAL
-        if not product_intent:
-            return "GLOBAL"
-
     # ============================================
     # 3) Các câu hỏi mang tính giáo trình -> GLOBAL
     # ============================================
