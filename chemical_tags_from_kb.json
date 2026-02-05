@@ -1,5 +1,5 @@
 {
-  "glufosinate-amonium": {
+  "glufosinate-ammonium": {
     "crops": [
       "ca phe",
       "cao su",
@@ -112,7 +112,10 @@
     ],
     "pests": [],
     "diseases": [],
-    "weeds": []
+    "weeds": [
+      "la rong",
+      "co lac",
+      "co nang"]
   },
   "mesotrione": {
     "crops": [
@@ -122,7 +125,10 @@
     ],
     "pests": [],
     "diseases": [],
-    "weeds": []
+    "weeds": [
+      "la rong",
+      "la hep"
+    ]
   },
   "acetochlor": {
     "crops": [
@@ -138,6 +144,7 @@
     "pests": [],
     "diseases": [],
     "weeds": [
+      "tien nay mam",
       "co chi",
       "co duoi chon",
       "co gau",
@@ -293,7 +300,14 @@
     "diseases": [],
     "weeds": [
       "co hoa thao",
-      "co la rong"
+      "co la rong",
+      "man trau",
+      "co tuc",
+      "co ong",
+      "chan ga",
+      "den gai",
+      "rau sam",
+      "mac co"
     ]
   },
   "atrazine": {
@@ -507,11 +521,10 @@
       "sieu nhan",
       "sung dat",
       "sung khoai",
-      "tuyen trung",
       "u cuc re",
       "ve sau"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "avermectin-b1b": {
@@ -551,11 +564,10 @@
       "sieu nhan",
       "sung dat",
       "sung khoai",
-      "tuyen trung",
       "u cuc re",
       "ve sau"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "cartap-hydrochloride": {
@@ -617,10 +629,9 @@
       "sau duc than",
       "sau keo",
       "sau phao",
-      "sung",
-      "tuyen trung"
+      "sung"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "pirimiphos-methyl": {
@@ -651,10 +662,9 @@
       "sau duc than",
       "sau keo",
       "sau phao",
-      "sung",
-      "tuyen trung"
+      "sung"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "chlorfenapyr": {
@@ -721,11 +731,9 @@
       "mot duc canh",
       "rep sap",
       "sau dat",
-      "tuyen trung",
-      "tuyen trung re",
       "ve sau"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "nitenpyram": {
@@ -999,10 +1007,9 @@
       "sau duc than",
       "sau ve bua",
       "sau xanh",
-      "sau xanh da lang",
-      "tuyen trung"
+      "sau xanh da lang"
     ],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "alpha-cypermethrin": {
@@ -2122,7 +2129,7 @@
       "cu toi"
     ],
     "pests": [],
-    "diseases": [],
+    "diseases": ["tuyen trung"],
     "weeds": []
   },
   "penconazole": {

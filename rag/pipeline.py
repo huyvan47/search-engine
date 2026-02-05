@@ -5,7 +5,7 @@ from datetime import datetime
 from rag.config import RAGConfig
 from rag.router import route_query
 from rag.normalize import normalize_query
-from rag.text_utils import is_listing_query, extract_img_keys
+from rag.text_utils import is_listing_query
 from rag.retriever import search as retrieve_search
 from rag.scoring import fused_score
 from rag.context_builder import choose_adaptive_max_ctx, build_context_from_hits
@@ -41,6 +41,78 @@ def make_run_dir(query: str):
     root.mkdir(parents=True, exist_ok=True)
 
     return root
+
+def emit_trace_snapshot(*,
+    user_query,
+    effective_query,
+    norm_query,
+    must_tags,
+    any_tags,
+    hits,
+    base_ctx,
+    context,
+    l3_missing_slots,
+    missing_after_t4,
+    t4_report,
+    need_kb_fallback,
+    memory_prompt,
+    final_system_override,
+    answer_mode,
+):
+    def safe_len(x):
+        try:
+            return len(x)
+        except:
+            return 0
+
+    print("\n================ FINAL RAG TRACE =================")
+    print("USER QUERY      :", user_query)
+    print("EFFECTIVE QUERY :", effective_query)
+    print("NORMALIZED      :", norm_query)
+    print("ANSWER MODE     :", answer_mode)
+    print("--------------------------------------------------")
+
+    print("TAGS:")
+    print("  MUST :", must_tags)
+    print("  ANY  :", any_tags)
+    print("--------------------------------------------------")
+
+    print("RETRIEVAL:")
+    print("  total hits :", len(hits))
+    print("  T4 hits    :", sum(1 for h in hits if h.get("t4_origin_query")))
+    print("  KB hits    :", sum(1 for h in hits if not h.get("t4_origin_query")))
+    print("--------------------------------------------------")
+
+    print("L3 / T4:")
+    print("  L3 missing slots      :", l3_missing_slots)
+    print("  missing after T4     :", missing_after_t4)
+    print("  T4 report present    :", bool(t4_report))
+    print("--------------------------------------------------")
+
+    print("T5 FALLBACK:")
+    print("  need_kb_fallback :", need_kb_fallback)
+    if need_kb_fallback:
+        print("  [T5] knowledge injected")
+    else:
+        print("  [T5] NOT triggered")
+    print("--------------------------------------------------")
+
+    print("CONTEXT:")
+    print("  base ctx length :", safe_len(base_ctx))
+    print("  final ctx length:", safe_len(context))
+    print("  T5 added chars  :", max(0, safe_len(context) - safe_len(base_ctx)))
+    print("--------------------------------------------------")
+
+    print("SYSTEM PROMPT:")
+    print("  memory chars   :", safe_len(memory_prompt))
+    print("  override chars :", safe_len(final_system_override))
+    print("--------------------------------------------------")
+
+    print("MODEL INPUT SUMMARY:")
+    print("  system total   :", safe_len(memory_prompt + final_system_override))
+    print("  context total  :", safe_len(context))
+    print("==================================================\n")
+
 
 KB_FALLBACK_SLOTS = {
     "need_pesticide",
@@ -197,15 +269,6 @@ def strip_tag_ns(s):
         else:
             out.append(part)
     return " ".join(out)
-
-#Phân tách doc để phục vụ  xử lý match key word trong q,a,alt
-def doc_blob(h):
-    return norm(
-        (h.get("question","") or "") + " " +
-        (h.get("answer","") or "") + " " +
-        " ".join(h.get("alt_questions",[]) or []) + " " +
-        strip_tag_ns(h.get("tags_v2",""))
-    )
 
 #Chuẩn hóa tag
 def strip_ns(t):
@@ -507,12 +570,29 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
         to complete the user's objective.
         Do not answer using only internal data.
         """
-    
     yield "✍️ Đang tổng hợp câu trả lời...\n\n"
 
     # 7) generate streaming (FINAL)
     answer_mode_final = (
         "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else "default"
+    )
+
+    emit_trace_snapshot(
+        user_query=user_query,
+        effective_query=effective_query,
+        norm_query=norm_query,
+        must_tags=must_tags,
+        any_tags=any_tags,
+        hits=hits,
+        base_ctx=build_context_from_hits(hits[:max_ctx]),  # context trước T4/T5
+        context=context,
+        l3_missing_slots=l3_missing_slots,
+        missing_after_t4=missing_after_t4,
+        t4_report=t4_report,
+        need_kb_fallback=need_kb_fallback,
+        memory_prompt=memory_prompt,
+        final_system_override=final_system_override,
+        answer_mode=answer_mode_final,
     )
 
     timer.start("final_gpt_ttft")

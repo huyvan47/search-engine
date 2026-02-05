@@ -29,11 +29,6 @@ def _hits_brief(hits: List[dict], n: int = 12) -> List[dict]:
         })
     return out
 
-def _draft_answer_stub(base_query: str, hits: List[dict]) -> str:
-    if not hits:
-        return "Không tìm thấy dữ liệu phù hợp trong hệ thống."
-    return f"Dựa trên tài liệu hiện có cho câu hỏi '{base_query}', có thể tồn tại giải pháp phối hợp nhưng chưa đủ thành phần cụ thể."
-
 
 def t4_kb_validator(*, l3_gap: dict, hits: List[dict]) -> Dict[str, Any]:
     """
@@ -301,7 +296,7 @@ def run_solution_completion(
         "intents": intents,
         "docs_added": len(added)
     }
-    print("l3-data: ", t4_report)
+    print("t4_report: ", t4_report)
 
     return hits + added, t4_report
 
