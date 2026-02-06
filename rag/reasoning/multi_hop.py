@@ -361,21 +361,30 @@ Rules:
 
 def expand_query_with_llm(client, base_query: str) -> List[str]:
     prompt = f"""
-Rewrite this crop-related question into multiple alternative search queries:
+    You are a crop protection specialist.
 
-"{base_query}"
+    A farmer described the following crop problem:
+    "{base_query}"
 
-Include:
-- scientific terms
-- agronomy style phrasing
-- common farmer phrasing
+    Task:
+    Based on fundamental agronomic knowledge, suggest COMMONLY USED
+    ACTIVE INGREDIENTS that are globally recognized as effective
+    for this type of crop problem.
 
-Rules:
-- 4–8 variants
-- Do not change meaning
-- No explanations
-- Return JSON array only
-"""
+    Rules:
+    - ACTIVE INGREDIENTS ONLY (no brand names, no products).
+    - Use standard international active ingredient names.
+    - 5–8 items maximum.
+    - No explanations.
+    - Return STRICT JSON ARRAY of strings.
+
+    Output example:
+    [
+    "Azoxystrobin",
+    "Mancozeb",
+    "Difenoconazole"
+    ]
+    """
     resp = client.chat.completions.create(
         model="gpt-4.1",
         messages=[{"role": "user", "content": prompt}],
@@ -425,7 +434,7 @@ def no_hit_recovery_pipeline(
     base_query: str,
     any_tags: List[str],
     top_k: int,
-    max_docs: int = 32,
+    max_docs: int = 60,
 ):
     """
     Evidence-based recovery when hop1 returns no hits.
@@ -467,10 +476,10 @@ def no_hit_recovery_pipeline(
             print("  tags:", tag_result)
             must = tag_result.get("must", [])
             any_  = tag_result.get("any", [])
-            # 🚫 Reject ungrounded queries (no ontology anchor)
-            if not must and not any_:
-                print("  ⚠ SKIP (no tags) →", q)
-                continue
+            # # 🚫 Reject ungrounded queries (no ontology anchor)
+            # if not must and not any_:
+            #     print("  ⚠ SKIP (no tags) →", q)
+            #     continue
             # FORMULA: dùng tag sinh ra, không dùng any_tags gốc
             if mode == "formula":
                 any_ = any_
@@ -610,16 +619,20 @@ def multi_hop_controller(
 
     # ---- HOP 1C — TAG-FILTER expansion ----
     if not unique_hits1:
-        tag_queries = expand_query_with_llm(client, base_query)
+        tag_queries = []
+        active_ingredients = expand_query_with_llm(client, base_query)
+        for ai in active_ingredients:
+            tag_queries.append(f"{base_query} {ai}")
+        
         for q in tag_queries:
             tag_result = tag_filter_pipeline(q)
+            tag_queries.append(f"hoạt chất {tag_result}")
             must = tag_result.get("must", [])
             any_  = tag_result.get("any", [])
 
             # ontology guard
             if not must and not any_:
                 continue
-
             hits = retrieve_search(
                 client=client,
                 kb=kb,

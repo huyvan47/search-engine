@@ -61,6 +61,7 @@ CÁC QUY TẮC BẮT BUỘC
 =====================================
 SLOTS BẠN ĐƯỢC PHÉP DÙNG
 =====================================
+- need_herbicides
 - need_pesticide
 - need_foliar_fertilizer
 - need_mix_compatibility

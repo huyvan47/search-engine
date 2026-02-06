@@ -8,7 +8,7 @@ from rag.normalize import normalize_query
 from rag.text_utils import is_listing_query
 from rag.retriever import search as retrieve_search
 from rag.scoring import fused_score
-from rag.context_builder import choose_adaptive_max_ctx, build_context_from_hits
+from rag.context_builder import build_context_from_hits
 from rag.memory.conversation_manager import read_memory, log_event, build_conversation_text, write_memory
 from rag.memory.summarizer import summarize_to_fact
 from rag.conversation_state import conversation_state
@@ -476,11 +476,11 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     # 6) build context (pre T3/T4/T5)
     timer.start("build_context")
-    base_ctx = choose_adaptive_max_ctx(hits, is_listing=is_list)
+    base_ctx = RAGConfig.max_ctx_soft
     max_ctx = min(RAGConfig.max_ctx_strict, base_ctx)
 
     policy = decide_answer_policy(effective_query, primary_doc, force_listing=is_list)
-
+    print("POLICY answer mode:", policy.intent)
     off_filter_tag_on_doc = policy.intent not in {"disease"}
     if not off_filter_tag_on_doc:
         base_hits = [h for h in hits if not h.get("t4_origin_query")]
@@ -574,7 +574,7 @@ def answer_with_suggestions_stream(*, user_id, user_query, kb, client, cfg, poli
 
     # 7) generate streaming (FINAL)
     answer_mode_final = (
-        "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else "default"
+        "formula" if is_formula_query(norm_query, {"must": must_tags, "soft": any_tags}) else policy.format
     )
 
     emit_trace_snapshot(

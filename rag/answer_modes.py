@@ -61,7 +61,7 @@ KW_PROCEDURE = [
     "làm thế nào", "phương pháp", "quy cách", "thực hiện"
 ]
 KW_LISTING = [
-    "liệt kê", "kể tên", "danh sách", "tổng hợp", "bao gồm những", "gồm những",
+    "liệt kê", "kể tên", "danh sách", "tổng hợp", "bao gồm những", "gồm những", "all",
     "các loại", "những loại", "những sản phẩm", "những thuốc", "tất cả", "chứa", "các sản phẩm", "các thuốc"
 ]
 
@@ -139,7 +139,7 @@ def decide_answer_policy(
     is_listing = force_listing if force_listing is not None else detect_listing(q)
     if is_listing:
         # listing thường cần nhiều nguồn hơn một chút, nhưng vẫn phải khống chế
-        return AnswerPolicy(intent="general", format="listing", require_grounding=True, max_sources=15)
+        return AnswerPolicy(intent="listing", format="listing", require_grounding=True, max_sources=50)
 
     # 2) Entity_type is the new "category"
     if ent and ent in ENTITY_TO_POLICY:

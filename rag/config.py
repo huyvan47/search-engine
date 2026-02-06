@@ -185,7 +185,7 @@ class RAGConfig:
     # max_ctx_soft: int = 16
 
     # Dành riêng cho câu hỏi dạng listing
-    max_ctx_listing: int = 12
+    max_ctx_listing: int = 30
 
     # Dành cho câu hỏi hỏi đáp cần reasoning
     max_ctx_reasoning: int = 24

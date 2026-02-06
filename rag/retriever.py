@@ -58,6 +58,9 @@ def parse_doc_tags(doc):
 def search(client, kb, norm_query: str, top_k: int, must_tags=None, any_tags=None):
     must_tags = list(must_tags or [])
     any_tags  = list(any_tags or [])
+    print('norm_query: ', norm_query)
+    print('must_tags: ', must_tags)
+    print('any_tags: ', any_tags)
 
     # Backward compatibility:
     # old: (EMBS, QUESTIONS, ANSWERS, ALT_QUESTIONS, CATEGORY, TAGS, IDS)

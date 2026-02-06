@@ -63,7 +63,7 @@ def route_query(client, user_query: str) -> str:
     # ============================================
 
     product_context = re.search(
-        r"\b(thuốc|sản phẩm|mã|giá|đại lý|mua|công thức)\b",
+        r"\b(thuốc|sản phẩm|mã|giá|đại lý|mua|công thức|all)\b",
         q
     )
     

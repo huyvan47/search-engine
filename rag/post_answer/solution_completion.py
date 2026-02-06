@@ -243,7 +243,9 @@ def run_solution_completion(
 
         # map slot → query
         for s in l3_missing_slots:
-            if s == "need_pesticide":
+            if s == "need_herbicides":
+                intents.append({"slot": s, "query": "thuốc trừ cỏ"})
+            elif s == "need_pesticide":
                 intents.append({"slot": s, "query": "thuốc trừ sâu"})
             elif s == "need_foliar_fertilizer":
                 intents.append({"slot": s, "query": "phân bón lá"})
