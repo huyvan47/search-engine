@@ -558,6 +558,8 @@ def no_hit_recovery_pipeline(
 # -----------------------------------------
 # 4) Multi-hop controller (production-grade)
 # -----------------------------------------
+from typing import List, Dict, Any, Tuple, Optional
+
 def multi_hop_controller(
     *,
     client,
@@ -576,6 +578,40 @@ def multi_hop_controller(
     must_tags = list(must_tags or [])
     any_tags  = list(any_tags or [])
 
+    # -----------------------------
+    # Guards (enterprise invariant)
+    # -----------------------------
+    if not isinstance(base_query, str):
+        raise TypeError(f"base_query must be str, got {type(base_query)}")
+    base_query = base_query.strip()
+    if not base_query:
+        return []
+
+    def _ensure_str_query(q: Any, stage: str) -> str:
+        # Block the exact bug you hit: dict/obj gets fed into query
+        if isinstance(q, dict):
+            raise RuntimeError(f"[{stage}] query became dict (BUG): {q}")
+        if not isinstance(q, str):
+            raise RuntimeError(f"[{stage}] query invalid type: {type(q)}")
+        q = q.strip()
+        if not q:
+            raise RuntimeError(f"[{stage}] empty query")
+        return q
+
+    def _safe_extract_ai_tags(tag_result: Any) -> Tuple[List[str], List[str]]:
+        # tag_filter_pipeline should return dict with keys must/any
+        if not isinstance(tag_result, dict):
+            return [], []
+        must = tag_result.get("must", []) or []
+        any_ = tag_result.get("any", []) or []
+        # Ensure lists
+        must = must if isinstance(must, list) else []
+        any_ = any_ if isinstance(any_, list) else []
+        # Ensure elements are strings
+        must = [t for t in must if isinstance(t, str)]
+        any_ = [t for t in any_ if isinstance(t, str)]
+        return must, any_
+
     all_hits: List[dict] = []
     seen_ids = set()
     hops_data: List[dict] = []
@@ -587,8 +623,7 @@ def multi_hop_controller(
     # =========================
     # HOP 1 — Ontology-driven retrieval
     # =========================
-
-    unique_hits1 = []
+    unique_hits1: List[dict] = []
     hop1_stage = "NONE"
 
     # ---- HOP 1A — MUST strict ----
@@ -617,22 +652,36 @@ def multi_hop_controller(
         unique_hits1 = _dedupe_hits(hits, seen_ids)
         hop1_stage = "ANY"
 
-    # ---- HOP 1C — TAG-FILTER expansion ----
+    # ---- HOP 1C — TAG-FILTER expansion (SAFE) ----
     if not unique_hits1:
-        tag_queries = []
+        # 1) Expand active ingredients with LLM (returns List[str])
         active_ingredients = expand_query_with_llm(client, base_query)
+        if not isinstance(active_ingredients, list):
+            active_ingredients = []
+
+        # Hard cap to prevent blow-up
+        active_ingredients = [ai for ai in active_ingredients if isinstance(ai, str)]
+        active_ingredients = active_ingredients[:8]  # matches your prompt 5–8
+
+        # 2) Build queries ONCE (no appending while iterating)
+        seed_queries: List[str] = []
         for ai in active_ingredients:
-            tag_queries.append(f"{base_query} {ai}")
-        
-        for q in tag_queries:
+            ai = ai.strip()
+            if not ai:
+                continue
+            seed_queries.append(f"{base_query} {ai}")
+
+        # 3) Iterate over a frozen list
+        for q in list(seed_queries):
+            q = _ensure_str_query(q, "hop1_tag_expand_seed")
+
             tag_result = tag_filter_pipeline(q)
-            tag_queries.append(f"hoạt chất {tag_result}")
-            must = tag_result.get("must", [])
-            any_  = tag_result.get("any", [])
+            must, any_ = _safe_extract_ai_tags(tag_result)
 
             # ontology guard
             if not must and not any_:
                 continue
+
             hits = retrieve_search(
                 client=client,
                 kb=kb,
@@ -641,10 +690,36 @@ def multi_hop_controller(
                 must_tags=must,
                 any_tags=any_,
             )
+
             new_hits = _dedupe_hits(hits, seen_ids)
             if new_hits:
                 unique_hits1.extend(new_hits)
                 hop1_stage = "TAG_FILTER"
+
+        # Optional: second pass query form "hoạt chất <name>" (SAFE)
+        # Only append ingredient names, NEVER append tag_result dict.
+        if not unique_hits1 and active_ingredients:
+            ai_queries = [f"hoạt chất {ai}" for ai in active_ingredients if ai.strip()]
+            for q in ai_queries:
+                q = _ensure_str_query(q, "hop1_ai_queries")
+
+                tag_result = tag_filter_pipeline(q)
+                must, any_ = _safe_extract_ai_tags(tag_result)
+                if not must and not any_:
+                    continue
+
+                hits = retrieve_search(
+                    client=client,
+                    kb=kb,
+                    norm_query=q,
+                    top_k=top_k,
+                    must_tags=must,
+                    any_tags=any_,
+                )
+                new_hits = _dedupe_hits(hits, seen_ids)
+                if new_hits:
+                    unique_hits1.extend(new_hits)
+                    hop1_stage = "TAG_FILTER_AI"
 
     # ---- Record hop1 ----
     all_hits.extend(unique_hits1)
@@ -659,31 +734,6 @@ def multi_hop_controller(
             "stop_reason": "",
         },
     })
-
-    # =========================
-    # HOP1 FAILED → Recovery
-    # =========================
-    if not unique_hits1:
-        hops_data[-1]["decision"]["stop_reason"] = "no_hits_hop1_recovered"
-
-        recovered_hits = no_hit_recovery_pipeline(
-            client=client,
-            kb=kb,
-            base_query=base_query,
-            any_tags=any_tags,
-            top_k=top_k,
-        )
-
-        recovered_unique = _dedupe_hits(recovered_hits, seen_ids)
-        all_hits.extend(recovered_unique)
-
-        if enable_logs:
-            write_multi_hop_logs(
-                original_query=base_query,
-                hops_data=hops_data,
-                final_hits=all_hits,
-            )
-        return all_hits
 
     # =========================
     # Enough coverage after Hop1
@@ -703,6 +753,8 @@ def multi_hop_controller(
     # =========================
     current_query = base_query
 
+    # NOTE: you had max_hops + 3; that can overshoot and is confusing.
+    # Keep it max_hops inclusive (enterprise predictable)
     for hop in range(2, max_hops + 1):
 
         need, next_query, llm_reason = analyze_need_next_hop(
@@ -713,7 +765,7 @@ def multi_hop_controller(
             max_hops=max_hops,
         )
 
-        decision = {
+        decision: Dict[str, Any] = {
             "need_next_hop": need,
             "llm_reason": llm_reason,
             "stop_reason": "",
@@ -729,6 +781,8 @@ def multi_hop_controller(
                 "decision": decision,
             })
             break
+
+        next_query = _ensure_str_query(next_query, "hopN_next_query")
 
         if next_query in used_queries:
             decision["stop_reason"] = "repeat_query_blocked"
